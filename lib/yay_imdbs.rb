@@ -2,7 +2,7 @@
 require 'open-uri'
 require 'nokogiri'
 require 'htmlentities'
-require 'activesupport'
+require 'active_support/all'
 
 class YayImdbs 
   IMDB_BASE_URL = 'http://www.imdb.com/'
@@ -63,7 +63,7 @@ class YayImdbs
   end  
 
   def self.scrap_movie_info(imdb_id)
-    info_hash = HashWithIndifferentAccess.new
+    info_hash = {}.with_indifferent_access
   
     doc = self.get_movie_page(imdb_id)
     coder = HTMLEntities.new

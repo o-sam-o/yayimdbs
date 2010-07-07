@@ -30,7 +30,9 @@ spec = Gem::Specification.new do |s|
 
   s.add_dependency("nokogiri")
   s.add_dependency("htmlentities")
-  s.add_dependency("activesupport")
+  s.add_dependency("active_support")
+  s.add_dependency("tzinfo")
+  s.add_dependency("i18n")
   
   s.add_development_dependency("rspec")
 
