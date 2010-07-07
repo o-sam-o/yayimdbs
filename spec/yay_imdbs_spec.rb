@@ -98,7 +98,7 @@ describe YayImdbs do
   
   context 'should scrap info from imdb' do
   
-    it 'should retrive the metadata for Avatar (2009)' do
+    it 'should retrive the metadata for a movie' do
       imdb_id = '0499549'
       YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Avatar.2009.html'))
       movie_info = YayImdbs.scrap_movie_info(imdb_id)
@@ -114,6 +114,41 @@ describe YayImdbs do
       movie_info[:language].should == 'English'
       movie_info[:runtime].should == 162
       movie_info[:genre].should == ['Action', 'Adventure', 'Sci-Fi']
+    end  
+  
+    it 'should retrieve metadata for a tv show' do
+      imdb_id = '0411008'
+      YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Lost.2004.html'))
+      YayImdbs.should_receive(:get_episodes_page).with(imdb_id).and_return(stubbed_page_result('Lost.2004.Episodes.html'))
+      show_info = YayImdbs.scrap_movie_info(imdb_id)
+      
+      show_info[:title].should == 'Lost'
+      show_info[:year].should == 2004
+      show_info[:video_type].should == :tv_show
+      show_info[:plot].should == 'The survivors of a plane crash are forced to live with each other on a remote island, a dangerous new world that poses unique threats of its own.'
+      show_info[:tagline].should == "They're not the survivors they think they are. (Season Two)"
+      # TODO should be a list, see below
+      show_info[:language].should == 'English'
+      show_info[:runtime].should == 42
+      show_info[:genre].should == ['Adventure', 'Drama', 'Mystery', 'Sci-Fi', 'Thriller']      
+      
+      show_info[:episodes].should_not be_nil
+      show_info[:episodes].should_not be_empty
+      show_info[:episodes].length.should == 116
+      
+      series_2_ep_5 = nil
+      show_info[:episodes].each do |episode|
+        episode[:series].should_not be_nil
+        episode[:episode].should_not be_nil
+        episode[:title].should_not be_nil
+        episode[:date].should_not be_nil
+
+        series_2_ep_5 = episode if episode[:series] == 2 && episode[:episode] == 5
+      end      
+      
+      series_2_ep_5[:title].should == '...And Found'
+      series_2_ep_5[:plot].should == %q{A desperate and growingly insane Michael sets off into the jungle by himself determined to find Walt, but discovers that he is not alone. Meanwhile, Sawyer and Jin are ordered by their captors, the tail crash survivors, to take them to their camp. But they are delayed when Jin and the hulking Mr. Eko are forced to go into the jungle to look for Michael before the dreaded "others" find him first. Back at the beach camp, Sun frantically searches for her missing wedding ring which triggers flashbacks to Sun and Jin's past showing how they met for the first time in early 1990s Seoul, when Jin was working as a doorman of a fancy hotel where Sun was staying at for a courtship engagement set up by her mother.}
+      series_2_ep_5[:date].should == Date.new(y=2005,m=10,d=19)
     end  
   
     it 'should be possible to access movie info by string or symbol' do
