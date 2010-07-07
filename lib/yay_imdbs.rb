@@ -1,6 +1,6 @@
 # encoding: utf-8
 require 'open-uri'
-require 'hpricot'
+require 'nokogiri'
 require 'htmlentities'
 require 'activesupport'
 
@@ -33,8 +33,8 @@ class YayImdbs
     # we uses the the title meta element to determine if we got an exact match
     movie_title, movie_year = get_title_and_year_from_meta(doc)
     if movie_title
-      canonical_link = doc.search("//link[@rel='canonical']")
-      if canonical_link && canonical_link.first.attributes['href'] =~ /tt(\d+)\//
+      canonical_link = doc.xpath("//link[@rel='canonical']")
+      if canonical_link && canonical_link.first['href'] =~ /tt(\d+)\//
         return [:name => movie_title, :year => movie_year, :imdb_id => $1, :video_type => self.video_type_from_meta(doc)]
       else
         raise "Unable to extract imdb id from exact search result"
@@ -42,11 +42,11 @@ class YayImdbs
     end
   
     coder = HTMLEntities.new
-    doc.search("//td").each do |td| 
-      td.search("//a") do |link|  
-        href = link.attributes['href']
-        current_name = link.inner_text
-      
+    doc.xpath("//td").each do |td| 
+      td.xpath(".//a").each do |link|  
+        href = link['href']
+        current_name = link.content
+        
         # Ignore links with no text (e.g. image links)
         next unless current_name.present?
         current_name = self.clean_title(coder.decode(current_name))
@@ -75,15 +75,15 @@ class YayImdbs
     info_hash['video_type'] = self.video_type_from_meta(doc)
     
     found_info_divs = false
-    doc.search("//div[@class='info']") do |div|
-      next if div.search("//h5").empty?
+    doc.xpath("//div[@class='info']").each do |div|
+      next if div.xpath(".//h5").empty?
       found_info_divs = true
-      key = div.search("//h5").first.inner_text.sub(':', '').downcase
-      value_search = "//div[@class = 'info-content']"
+      key = div.xpath(".//h5").first.inner_text.sub(':', '').downcase
+      value_search = ".//div[@class = 'info-content']"
       # Try to only get text values and ignore links as some info blocks have a "click for more info" type link at the end
-      value = div.search(value_search).first.children.map{|e| e.text? ? e.to_s.encode("UTF-8") : ''}.join.gsub(STRIP_WHITESPACE, '').strip
+      value = div.xpath(value_search).first.children.map{|e| e.text? ? e.to_s.encode("UTF-8") : ''}.join.gsub(STRIP_WHITESPACE, '').strip
       if value.empty?
-        value = div.search(value_search).first.inner_text.gsub(STRIP_WHITESPACE, '')
+        value = div.xpath(value_search).first.content.gsub(STRIP_WHITESPACE, '')
       end
       value = coder.decode(value)
       if key == 'release date'
@@ -105,7 +105,7 @@ class YayImdbs
         # This is a bit of a hack, I dont really want to deal with multiple langauges, so if there is more than one
         # just use english or the first one found
         value = nil
-        div.search(value_search).first.inner_text.split(/\|/).collect {|l| l.strip}.each do |language|
+        div.xpath(value_search).first.inner_text.split(/\|/).collect {|l| l.strip}.each do |language|
           value = language if value.nil?
           value = language if language.downcase == 'english'
         end
@@ -120,16 +120,16 @@ class YayImdbs
   
   
     #scrap poster image urls
-    thumb = doc.search("//div[@class = 'photo']/a/img")
+    thumb = doc.xpath("//div[@class = 'photo']/a/img")
     if thumb
-      thumbnail_url = thumb.first.attributes['src']
+      thumbnail_url = thumb.first['src']
       if not thumbnail_url =~ /addposter.jpg$/ 
         info_hash['small_image'] = thumbnail_url
       
         #Try to scrap a larger version of the image url
-        large_img_page = doc.search("//div[@class = 'photo']/a").first.attributes['href']
-        large_img_doc = Hpricot(open('http://www.imdb.com' + large_img_page))
-        large_img_url = large_img_doc.search("//img[@id = 'primary-img']").first.attributes['src'] unless large_img_doc.search("//img[@id = 'primary-img']").empty?
+        large_img_page = doc.xpath("//div[@class = 'photo']/a").first['href']
+        large_img_doc = Nokogiri::HTML(open('http://www.imdb.com' + large_img_page))
+        large_img_url = large_img_doc.xpath("//img[@id = 'primary-img']").first['src'] unless large_img_doc.xpath("//img[@id = 'primary-img']").empty?
         info_hash['large_image'] = large_img_url
       end
     end
@@ -138,11 +138,11 @@ class YayImdbs
     if info_hash.has_key?('seasons')
       episodes = []
       doc = self.get_episodes_page(imdb_id)
-      episode_divs = doc.search(".filter-all")
+      episode_divs = doc.css(".filter-all")
       episode_divs.each do |e_div|
-        if e_div.search('//h3').inner_text =~ /Season (\d+), Episode (\d+):/
+        if e_div.xpath('.//h3').inner_text =~ /Season (\d+), Episode (\d+):/
           episode = {"series" => $1.to_i, "episode" => $2.to_i, "title" => coder.decode($').strip}
-          if e_div.search("//td").inner_text =~ /(\d+ (January|February|March|April|May|June|July|August|September|October|November|December) \d{4})/
+          if e_div.xpath(".//td").inner_text =~ /(\d+ (January|February|March|April|May|June|July|August|September|October|November|December) \d{4})/
             episode['date'] = Date.parse($1)
             episode['plot'] = coder.decode($').strip
           end
@@ -157,21 +157,21 @@ class YayImdbs
 
   private
     def self.get_search_page(name)
-      return Hpricot(open(IMDB_SEARCH_URL + URI.escape(name)))
+      return Nokogiri::HTML(open(IMDB_SEARCH_URL + URI.escape(name)))
     end
 
     def self.get_movie_page(imdb_id)
-      return Hpricot(open(IMDB_MOVIE_URL + imdb_id))
+      return Nokogiri::HTML(open(IMDB_MOVIE_URL + imdb_id))
     end
 
     def self.get_episodes_page(imdb_id)
-      return Hpricot(open(IMDB_MOVIE_URL + imdb_id + '/episodes'))
+      return Nokogiri::HTML(open(IMDB_MOVIE_URL + imdb_id + '/episodes'))
     end
 
     def self.get_title_and_year_from_meta(doc)
-      return nil, nil unless doc.search("//meta[@name='title']").first
+      return nil, nil unless doc.xpath("//meta[@name='title']").first
     
-      title_text = doc.search("//meta[@name='title']").first.attributes['content']
+      title_text = doc.xpath("//meta[@name='title']").first['content']
       # Matches 'Movie Name (2010)' or 'Movie Name (2010/I)'
       if title_text =~ /(.*) \((\d{4})\/?\w*\)/
         coder = HTMLEntities.new
@@ -190,13 +190,14 @@ class YayImdbs
     end  
   
     def self.video_type(td)
-      return :tv_show if td.inner_text =~ /\((TV series|TV)\)/
+      return :tv_show if td.content =~ /\((TV series|TV)\)/
       return :movie
     end 
   
     def self.video_type_from_meta(doc)
-      return :movie unless doc.search("//meta[@property*='type']").first
-      type_text = doc.search("//meta[@property*='type']").first.attributes['content']
+      meta_type_tag = doc.xpath("//meta[contains(@property,'type')]")
+      return :movie unless meta_type_tag.first
+      type_text = meta_type_tag.first['content']
       case type_text
         when 'tv_show' then return :tv_show
         else return :movie

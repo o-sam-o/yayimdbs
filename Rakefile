@@ -15,7 +15,7 @@ task :default => ["spec"]
 spec = Gem::Specification.new do |s|
 
   s.name              = "yayimdbs"
-  s.version           = "0.1.0"
+  s.version           = "0.1.1"
   s.summary           = "Yet Another Ying IMDB Scraper"
   s.author            = "Sam Cavenagh"
   s.email             = "cavenaghweb@hotmail.com"
@@ -25,11 +25,12 @@ spec = Gem::Specification.new do |s|
   s.extra_rdoc_files  = %w(README.md)
   s.rdoc_options      = %w(--main README.md)
 
-  s.files             = %w(README.md) + Dir.glob("{spec,lib/**/*,img/*}")
+  s.files             = %w(README.md) + Dir.glob("{spec,lib/**/*}")
   s.require_paths     = ["lib"]
 
-  s.add_dependency("hpricot")
+  s.add_dependency("nokogiri")
   s.add_dependency("htmlentities")
+  s.add_dependency("activesupport")
   
   s.add_development_dependency("rspec")
 
