@@ -54,3 +54,11 @@ desc 'Clear out RDoc and generated packages'
 task :clean => [:clobber_rdoc, :clobber_package] do
   rm "#{spec.name}.gemspec"
 end
+
+desc "Run all specs with RCov"
+Spec::Rake::SpecTask.new('specs_with_coverage') do |t|
+  t.spec_files = FileList['spec/**/*.rb']
+  t.rcov = true
+  t.rcov_opts = ['--include', 'lib']
+end
+
