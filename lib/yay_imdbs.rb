@@ -78,7 +78,7 @@ class YayImdbs
       key = div.xpath(".//h5").first.inner_text.sub(':', '').downcase
       value_search = ".//div[@class = 'info-content']"
       # Try to only get text values and ignore links as some info blocks have a "click for more info" type link at the end
-      value = div.xpath(value_search).first.children.map{|e| e.text? ? e.to_s.encode("UTF-8") : ''}.join.gsub(STRIP_WHITESPACE, '').strip
+      value = div.xpath(value_search).first.children.map{|e| e.text? ? e.to_s : ''}.join.gsub(STRIP_WHITESPACE, '').strip
       if value.empty?
         value = div.xpath(value_search).first.content.gsub(STRIP_WHITESPACE, '')
       end
