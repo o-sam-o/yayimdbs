@@ -1,7 +1,6 @@
 # encoding: utf-8
 require 'open-uri'
 require 'nokogiri'
-require 'htmlentities'
 require 'active_support/all'
 
 class YayImdbs 
@@ -41,7 +40,6 @@ class YayImdbs
       end
     end
   
-    coder = HTMLEntities.new
     doc.xpath("//td").each do |td| 
       td.xpath(".//a").each do |link|  
         href = link['href']
@@ -49,7 +47,7 @@ class YayImdbs
         
         # Ignore links with no text (e.g. image links)
         next unless current_name.present?
-        current_name = self.clean_title(coder.decode(current_name))
+        current_name = self.clean_title(current_name)
       
         if href =~ /^\/title\/tt(\d+)/
           imdb_id = $1
@@ -66,7 +64,6 @@ class YayImdbs
     info_hash = {}.with_indifferent_access
   
     doc = self.get_movie_page(imdb_id)
-    coder = HTMLEntities.new
     info_hash['title'], info_hash['year'] = get_title_and_year_from_meta(doc)
     if info_hash['title'].nil?
       #If we cant get title and year something is wrong
@@ -85,7 +82,6 @@ class YayImdbs
       if value.empty?
         value = div.xpath(value_search).first.content.gsub(STRIP_WHITESPACE, '')
       end
-      value = coder.decode(value)
       if key == 'release date'
         begin
           value = Date.strptime(value, '%d %B %Y')
@@ -141,10 +137,10 @@ class YayImdbs
       episode_divs = doc.css(".filter-all")
       episode_divs.each do |e_div|
         if e_div.xpath('.//h3').inner_text =~ /Season (\d+), Episode (\d+):/
-          episode = {"series" => $1.to_i, "episode" => $2.to_i, "title" => coder.decode($').strip}
+          episode = {"series" => $1.to_i, "episode" => $2.to_i, "title" => $'.strip}
           if e_div.xpath(".//td").inner_text =~ /(\d+ (January|February|March|April|May|June|July|August|September|October|November|December) \d{4})/
             episode['date'] = Date.parse($1)
-            episode['plot'] = coder.decode($').strip
+            episode['plot'] = $'.strip
           end
           episodes << episode
         end
@@ -174,8 +170,7 @@ class YayImdbs
       title_text = doc.xpath("//meta[@name='title']").first['content']
       # Matches 'Movie Name (2010)' or 'Movie Name (2010/I)'
       if title_text =~ /(.*) \((\d{4})\/?\w*\)/
-        coder = HTMLEntities.new
-        movie_title = coder.decode($1)
+        movie_title = $1
         movie_year = $2.to_i
       
         movie_title = self.clean_title(movie_title)
