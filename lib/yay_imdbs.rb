@@ -63,7 +63,7 @@ class YayImdbs
   end  
 
   def self.scrap_movie_info(imdb_id)
-    info_hash = {}
+    info_hash = HashWithIndifferentAccess.new
   
     doc = self.get_movie_page(imdb_id)
     coder = HTMLEntities.new
@@ -100,7 +100,7 @@ class YayImdbs
           p "Unexpected runtime format #{value} for movie #{imdb_id}"
         end
       elsif key == 'genre'
-        value = value.sub(/(See more$)|(more$)/, '')
+        value = value.sub(/(See more$)|(more$)/, '').strip.split
       elsif key == 'language'
         # This is a bit of a hack, I dont really want to deal with multiple langauges, so if there is more than one
         # just use english or the first one found
@@ -110,7 +110,7 @@ class YayImdbs
           value = language if language.downcase == 'english'
         end
       end
-      info_hash[key.downcase] = value
+      info_hash[key.downcase.gsub(/\s/, '_')] = value
     end
   
     if not found_info_divs

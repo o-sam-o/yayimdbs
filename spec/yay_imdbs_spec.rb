@@ -96,6 +96,42 @@ describe YayImdbs do
 
   end
   
+  context 'should scrap info from imdb' do
+  
+    it 'should retrive the metadata for Avatar (2009)' do
+      imdb_id = '0499549'
+      YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Avatar.2009.html'))
+      movie_info = YayImdbs.scrap_movie_info(imdb_id)
+      
+      movie_info[:title].should == 'Avatar'
+      movie_info[:year].should == 2009
+      movie_info[:video_type].should == :movie
+      movie_info[:release_date].should == Date.new(y=2009,m=12,d=17)
+      movie_info[:plot].should == 'A paraplegic marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.'
+      movie_info[:director].should == 'James Cameron'
+      movie_info[:tagline].should == 'Enter the World'
+      # TODO should be a list, see below
+      movie_info[:language].should == 'English'
+      movie_info[:runtime].should == 162
+      movie_info[:genre].should == ['Action', 'Adventure', 'Sci-Fi']
+    end  
+  
+    it 'should be possible to access movie info by string or symbol' do
+      imdb_id = '0499549'
+      YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Avatar.2009.html'))
+      movie_info = YayImdbs.scrap_movie_info(imdb_id)
+      
+      movie_info['title'].should == 'Avatar'
+      
+      movie_info[:title].should == 'Avatar'
+    end
+  
+    it 'should return a list of languages for a movie' do
+      pending
+    end  
+  
+  end  
+  
   def stubbed_page_result(stub_file)
     open(File.join(File.dirname(__FILE__), stub_file)) { |f| Nokogiri::HTML(f) }
   end
