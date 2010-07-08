@@ -16,7 +16,7 @@ describe YayImdbs do
     it 'should find movie imdb id with name only' do
       movie_name = 'Starsky & Hutch'
       YayImdbs.should_receive(:get_search_page).with(movie_name).and_return(stubbed_page_result('starkey_hutch_search.html'))
-      YayImdbs.search_for_imdb_id(movie_name, nil).should == '0335438'
+      YayImdbs.search_for_imdb_id(movie_name).should == '0335438'
     end
   
     it 'should return nil if not matching year' do
@@ -28,20 +28,20 @@ describe YayImdbs do
     it 'should find tv show imdb id with name only' do
       movie_name = 'Starsky & Hutch'
       YayImdbs.should_receive(:get_search_page).with(movie_name).and_return(stubbed_page_result('starkey_hutch_search.html'))
-      YayImdbs.search_for_imdb_id(movie_name, nil, true).should == '0072567'
+      YayImdbs.search_for_imdb_id(movie_name, nil, :tv_show).should == '0072567'
     end  
   
     it 'should find the imdb id when search redirects directly to the movie page' do
       movie_name = 'Avatar'
       YayImdbs.should_receive(:get_search_page).with(movie_name).and_return(stubbed_page_result('Avatar.2009.html'))
-      YayImdbs.search_for_imdb_id(movie_name, nil, false).should == '0499549'
+      YayImdbs.search_for_imdb_id(movie_name).should == '0499549'
     end  
 
     it 'should not find result if incorrect video type' do
       movie_name = 'Avatar'
       YayImdbs.should_receive(:get_search_page).with(movie_name).and_return(stubbed_page_result('Avatar.2009.html'))
       # We want a tv show but a movie is returned
-      YayImdbs.search_for_imdb_id(movie_name, nil, true).should be_nil
+      YayImdbs.search_for_imdb_id(movie_name, nil, :tv_show).should be_nil
     end
 
     it 'should search imdb and return name, year and id' do
@@ -162,7 +162,15 @@ describe YayImdbs do
     end
   
     it 'should return a list of languages for a movie' do
-      pending
+      pending "Currently returns english or the first language found"
+    end  
+  
+    it 'should get a image thumbnail url' do
+      pending 'This has been implemented but there is not spec'
+    end  
+    
+    it 'should get a large image url' do
+      pending 'This has been implemented but there is no spec'
     end  
   
   end  

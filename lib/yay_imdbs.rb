@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'open-uri'
 require 'nokogiri'
 require 'active_support/all'
@@ -8,15 +7,15 @@ class YayImdbs
   IMDB_SEARCH_URL = IMDB_BASE_URL + 'find?s=tt&q='
   IMDB_MOVIE_URL = IMDB_BASE_URL + 'title/tt'
 
-  STRIP_WHITESPACE = /(\s{2,}|\n|\||\302\240\302\273)/
+  STRIP_WHITESPACE = /(\s{2,}|\n|\||\302\240\302\273)/u
 
-  def self.search_for_imdb_id(name, year, tv_series=false)
+  def self.search_for_imdb_id(name, year=nil, type=nil)
     search_results = self.search_imdb(name)
     return nil if search_results.empty?
   
     search_results.each do |result|
       # Ensure result is the correct video type
-      next if (result[:video_type] == :tv_show) != tv_series
+      next if type && (result[:video_type] != type)
     
       # If no year provided just return first result
       return result[:imdb_id] if !year || result[:year] == year
@@ -78,9 +77,9 @@ class YayImdbs
       key = div.xpath(".//h5").first.inner_text.sub(':', '').downcase
       value_search = ".//div[@class = 'info-content']"
       # Try to only get text values and ignore links as some info blocks have a "click for more info" type link at the end
-      value = div.xpath(value_search).first.children.map{|e| e.text? ? e.to_s : ''}.join.gsub(STRIP_WHITESPACE, '').strip
+      value = strip_whitespace div.xpath(value_search).first.children.map{|e| e.text? ? e.to_s : ''}.join
       if value.empty?
-        value = div.xpath(value_search).first.content.gsub(STRIP_WHITESPACE, '')
+        value = strip_whitespace div.xpath(value_search).first.content
       end
       if key == 'release date'
         begin
@@ -182,6 +181,11 @@ class YayImdbs
     def self.clean_title(movie_title)
       movie_title = $1 if movie_title =~ /^"(.*)"$/
       return movie_title.strip
+    end  
+  
+    # Hackyness to get around ruby 1.9 encoding issue
+    def self.strip_whitespace(s)
+      s.encode('UTF-8').gsub(STRIP_WHITESPACE, '').strip
     end  
   
     def self.video_type(td)

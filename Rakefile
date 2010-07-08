@@ -15,8 +15,9 @@ task :default => ["spec"]
 spec = Gem::Specification.new do |s|
 
   s.name              = "yayimdbs"
-  s.version           = "0.1.1"
+  s.version           = "0.1.4"
   s.summary           = "Yet Another Ying IMDB Scraper"
+  s.description       = "A simple imdb scraper built on Nokogiri for ruby 1.9+"
   s.author            = "Sam Cavenagh"
   s.email             = "cavenaghweb@hotmail.com"
   s.homepage          = "http://github.com/o-sam-o/yayimdbs"
@@ -28,13 +29,13 @@ spec = Gem::Specification.new do |s|
   s.files             = %w(README.md) + Dir.glob("{spec,lib/**/*}")
   s.require_paths     = ["lib"]
 
-  s.add_dependency("nokogiri")
+  s.add_dependency("nokogiri", ">= 1.4.2")
 
-  s.add_dependency("active_support")
-  s.add_dependency("tzinfo")
-  s.add_dependency("i18n")
+  s.add_dependency("activesupport", ">= 3.0.0.beta4")
+  s.add_dependency("tzinfo", ">= 0.3.22")
+  s.add_dependency("i18n", ">= 0.4.1")
   
-  s.add_development_dependency("rspec")
+  s.add_development_dependency("rspec", ">= 2.5.8")
 
 end
 
