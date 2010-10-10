@@ -76,14 +76,8 @@ end
 def page_into_file(request_url, file_name)
   require 'net/http'
 
-  url = URI.parse(request_url)
-  req = Net::HTTP::Get.new(url.path)
-  res = Net::HTTP.start(url.host, url.port) {|http|
-    http.request(req)
-  }
-
   file = File.new(file_name, "w")
-  file.write(res.body)
+  file.write(Net::HTTP.get(URI.parse(request_url)))
   file.close
 
   p "Refreshed #{file_name}"
