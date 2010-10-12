@@ -43,7 +43,7 @@ class YayImdbs
       td.xpath(".//a").each do |link|  
         href = link['href']
         current_name = link.content
-        
+
         # Ignore links with no text (e.g. image links)
         next unless current_name.present?
         current_name = self.clean_title(current_name)
@@ -70,17 +70,17 @@ class YayImdbs
     end
     info_hash['video_type'] = self.video_type_from_meta(doc)
     
+    info_hash[:plot] = doc.xpath("//td[@id='overview-top']/p[2]").inner_text.strip
+
     found_info_divs = false
-    doc.xpath("//div[@class='info']").each do |div|
-      next if div.xpath(".//h5").empty?
+    doc.xpath("//div[@class='txt-block']").each do |div|
+      next if div.xpath(".//h4").empty?
       found_info_divs = true
-      key = div.xpath(".//h5").first.inner_text.sub(':', '').downcase
-      value_search = ".//div[@class = 'info-content']"
-      # Try to only get text values and ignore links as some info blocks have a "click for more info" type link at the end
-      value = strip_whitespace div.xpath(value_search).first.children.map{|e| e.text? ? e.to_s : ''}.join
-      if value.empty?
-        value = strip_whitespace div.xpath(value_search).first.content
-      end
+      raw_key = div.xpath(".//h4").first.inner_text
+      key = raw_key.sub(':', '').strip.downcase
+      value = div.inner_text[((div.inner_text =~ /#{Regexp.escape(raw_key)}/) + raw_key.length).. -1]
+      value = value.gsub(/\302\240\302\273/u, '').strip.gsub(/(See more)|(see all)$/, '').strip
+      
       if key == 'release date'
         begin
           value = Date.strptime(value, '%d %B %Y')
@@ -95,15 +95,14 @@ class YayImdbs
           p "Unexpected runtime format #{value} for movie #{imdb_id}"
         end
       elsif key == 'genre'
-        value = value.sub(/(See more$)|(more$)/, '').strip.split
+        value = value.strip.split
+      elsif key == 'year'
+        value = value.split('|').collect { |l| l.strip.to_i }.reject { |y| y <= 0 }
       elsif key == 'language'
-        # This is a bit of a hack, I dont really want to deal with multiple langauges, so if there is more than one
-        # just use english or the first one found
-        value = nil
-        div.xpath(value_search).first.inner_text.split(/\|/).collect {|l| l.strip}.each do |language|
-          value = language if value.nil?
-          value = language if language.downcase == 'english'
-        end
+        value = value.split('|').collect { |l| l.strip }
+      elsif key == 'taglines'
+        # Backwards compatibility
+        info_hash['tagline'] = value
       end
       info_hash[key.downcase.gsub(/\s/, '_')] = value
     end
@@ -116,7 +115,7 @@ class YayImdbs
   
     #scrap poster image urls
     thumb = doc.xpath("//div[@class = 'photo']/a/img")
-    if thumb
+    if thumb.first
       thumbnail_url = thumb.first['src']
       if not thumbnail_url =~ /addposter.jpg$/ 
         info_hash['small_image'] = thumbnail_url
@@ -130,7 +129,7 @@ class YayImdbs
     end
   
     #scrap episodes if tv series
-    if info_hash.has_key?('seasons')
+    if info_hash.has_key?('season')
       episodes = []
       doc = self.get_episodes_page(imdb_id)
       episode_divs = doc.css(".filter-all")
@@ -167,8 +166,8 @@ class YayImdbs
       return nil, nil unless doc.xpath("//meta[@name='title']").first
     
       title_text = doc.xpath("//meta[@name='title']").first['content']
-      # Matches 'Movie Name (2010)' or 'Movie Name (2010/I)'
-      if title_text =~ /(.*) \((\d{4})\/?\w*\)/
+      # Matches 'Movie Name (2010)' or 'Movie Name (2010/I)' or 'Lost (TV Series 2004–2010)'
+      if title_text =~ /(.*) \((?:TV\sSeries\s)?(\d{4})((\/\w*)|(.\d{4}))?\)/
         movie_title = $1
         movie_year = $2.to_i
       

@@ -1,5 +1,5 @@
-require 'spec_helper'
-
+require 'rspec'
+require './lib/yay_imdbs'
 describe YayImdbs do
   
   context 'should search for movie' do
@@ -49,18 +49,29 @@ describe YayImdbs do
       YayImdbs.should_receive(:get_search_page).with(movie_name).and_return(stubbed_page_result('starkey_hutch_search.html'))
       search_results = YayImdbs.search_imdb(movie_name)
     
-      search_results.should == [{:name => 'Starsky & Hutch', :year => 2004, :imdb_id => '0335438', :video_type => :movie},
-                    {:name => 'Starsky and Hutch', :year => 1975, :imdb_id => '0072567', :video_type => :tv_show},
-                    {:name => 'Starsky & Hutch', :year => 2003, :imdb_id => '1380813', :video_type => :movie},
-                    {:name => 'Starsky & Hutch: A Last Look', :year => 2004, :imdb_id => '0488639', :video_type => :movie},
-                    {:name => 'Starsky & Hutch Documentary: The Word on the Street', :year => 1999, :imdb_id => '1393834', :video_type => :tv_show},
-                    {:name => 'TV Guide Specials: Starsky & Hutch', :year => 2004, :imdb_id => '0464230', :video_type => :tv_show},
-                    {:name => "He's Starsky, I'm Hutch", :year => 2004, :imdb_id => '1540121', :video_type => :tv_show},
-                    {:name => 'The Real Story of Butch Cassidy and the Sundance Kid', :year => 1993, :imdb_id => '0401745', :video_type => :movie},
-                    {:name => "Le boucher, la star et l'orpheline", :year => 1975, :imdb_id => '0069819', :video_type => :movie},
-                    {:name => "Hutch Stirs 'em Up", :year => 1923, :imdb_id => '0290216', :video_type => :movie},
-                    {:name => 'Love and Hate: The Story of Colin and Joanne Thatcher', :year => 1989, :imdb_id => '0097788', :video_type => :tv_show}]                                    
-    end  
+      search_results.should == [
+        {:imdb_id=>"0335438", :name=>"Starsky & Hutch", :year=>2004, :video_type=>:movie}, 
+        {:imdb_id=>"0072567", :name=>"Starsky and Hutch", :year=>1975, :video_type=>:tv_show}, 
+        {:imdb_id=>"1380813", :name=>"Starsky & Hutch", :year=>2003, :video_type=>:movie}, 
+        {:imdb_id=>"0488639", :name=>"Starsky & Hutch: A Last Look", :year=>2004, :video_type=>:movie}, 
+        {:imdb_id=>"1393834", :name=>"Starsky & Hutch Documentary: The Word on the Street", :year=>1999, :video_type=>:tv_show}, 
+        {:imdb_id=>"0464230", :name=>"TV Guide Specials: Starsky & Hutch", :year=>2004, :video_type=>:tv_show}, 
+        {:imdb_id=>"0217769", :name=>"Frankie & Hazel", :year=>2000, :video_type=>:tv_show}, 
+        {:imdb_id=>"0401745", :name=>"The Real Story of Butch Cassidy and the Sundance Kid", :year=>1993, :video_type=>:movie}, 
+        {:imdb_id=>"0379812", :name=>"Hootch and Mootch in a Steak at Stake", :year=>1921, :video_type=>:movie}, 
+        {:imdb_id=>"0432880", :name=>"Hitchcock and 'Stage Fright'", :year=>2004, :video_type=>:movie}, 
+        {:imdb_id=>"0233299", :name=>"Battle of Jeffries and Sharkey for Championship of the World", :year=>1899, :video_type=>:movie}, 
+        {:imdb_id=>"0230693", :name=>"Reproduction of the Jeffries and Sharkey Fight", :year=>1899, :video_type=>:movie}, 
+        {:imdb_id=>"0285984", :name=>"Reproduction of the Sharkey and Fitzsimmons Fight", :year=>1900, :video_type=>:movie}, 
+        {:imdb_id=>"0097788", :name=>"Love and Hate: The Story of Colin and Joanne Thatcher", :year=>1989, :video_type=>:tv_show}, 
+        {:imdb_id=>"1082815", :name=>"A Jersey Christmas", :year=>2008, :video_type=>:movie}, 
+        {:imdb_id=>"0109205", :name=>"Bandit: Bandit Goes Country", :year=>1994, :video_type=>:tv_show}, 
+        {:imdb_id=>"0069819", :name=>"The Butcher, the Star and the Orphan", :year=>1975, :video_type=>:movie}, 
+        {:imdb_id=>"1184708", :name=>"Church and Stage", :year=>1912, :video_type=>:movie}, 
+        {:imdb_id=>"0032034", :name=>"Thunder Afloat", :year=>1939, :video_type=>:movie}, 
+        {:imdb_id=>"0896531", :name=>"Casting Call", :year=>2006, :video_type=>:movie}, 
+        {:imdb_id=>"0815241", :name=>"Religulous", :year=>2008, :video_type=>:movie}]
+   end  
 
     it 'should search imdb and return name, year and id even for exact search result' do
       movie_name = 'Avatar'
@@ -109,9 +120,9 @@ describe YayImdbs do
       movie_info[:release_date].should == Date.new(y=2009,m=12,d=17)
       movie_info[:plot].should == 'A paraplegic marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.'
       movie_info[:director].should == 'James Cameron'
-      movie_info[:tagline].should == 'Enter the World'
+      movie_info[:tagline].should == 'Return to Pandora'
       # TODO should be a list, see below
-      movie_info[:language].should == 'English'
+      movie_info[:language].first.should == 'English'
       movie_info[:runtime].should == 162
       movie_info[:genre].should == ['Action', 'Adventure', 'Sci-Fi']
     end  
@@ -123,12 +134,12 @@ describe YayImdbs do
       show_info = YayImdbs.scrap_movie_info(imdb_id)
       
       show_info[:title].should == 'Lost'
-      show_info[:year].should == 2004
+      show_info[:year].sort.first.should == 2004
       show_info[:video_type].should == :tv_show
       show_info[:plot].should == 'The survivors of a plane crash are forced to live with each other on a remote island, a dangerous new world that poses unique threats of its own.'
-      show_info[:tagline].should == "They're not the survivors they think they are. (Season Two)"
+      show_info[:tagline].should == "Destiny Calls (Season 5)"
       # TODO should be a list, see below
-      show_info[:language].should == 'English'
+      show_info[:language].first.should == 'English'
       show_info[:runtime].should == 42
       show_info[:genre].should == ['Adventure', 'Drama', 'Mystery', 'Sci-Fi', 'Thriller']      
       

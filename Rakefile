@@ -2,11 +2,10 @@ require "rubygems"
 require "rake/gempackagetask"
 require "rake/rdoctask"
 
-require "spec"
-require "spec/rake/spectask"
-Spec::Rake::SpecTask.new do |t|
-  t.spec_opts = %w(--format specdoc --colour)
-  t.libs = ["spec"]
+require "rspec"
+require "rspec/core/rake_task"
+RSpec::Core::RakeTask.new do |t|
+
 end
 
 
@@ -58,12 +57,6 @@ task :clean => [:clobber_rdoc, :clobber_package] do
   rm "#{spec.name}.gemspec"
 end
 
-desc "Run all specs with RCov"
-Spec::Rake::SpecTask.new('specs_with_coverage') do |t|
-  t.spec_files = FileList['spec/**/*.rb']
-  t.rcov = true
-  t.rcov_opts = ['--include', 'lib']
-end
 
 desc "Re-download imdb sample pages used in specs (Do this when imdb updates)"
 task :download_spec_html do
