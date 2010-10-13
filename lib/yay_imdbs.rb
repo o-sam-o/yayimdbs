@@ -1,3 +1,4 @@
+# encoding: UTF-8
 require 'open-uri'
 require 'nokogiri'
 require 'active_support/all'
@@ -167,7 +168,7 @@ class YayImdbs
     
       title_text = doc.xpath("//meta[@name='title']").first['content']
       # Matches 'Movie Name (2010)' or 'Movie Name (2010/I)' or 'Lost (TV Series 2004–2010)'
-      if title_text =~ /(.*) \((?:TV\sSeries\s)?(\d{4})((\/\w*)|(.\d{4}))?\)/
+      if title_text =~ /(.*) \([^\)0-9]*(\d{4})((\/\w*)|(.\d{4}))?\)/
         movie_title = $1
         movie_year = $2.to_i
       

@@ -1,3 +1,4 @@
+# encoding: UTF-8
 require 'rspec'
 require './lib/yay_imdbs'
 describe YayImdbs do
@@ -121,7 +122,7 @@ describe YayImdbs do
       movie_info[:plot].should == 'A paraplegic marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.'
       movie_info[:director].should == 'James Cameron'
       movie_info[:tagline].should == 'Return to Pandora'
-      # TODO should be a list, see below
+      pending "Having problems with strip"
       movie_info[:language].first.should == 'English'
       movie_info[:runtime].should == 162
       movie_info[:genre].should == ['Action', 'Adventure', 'Sci-Fi']
@@ -138,7 +139,7 @@ describe YayImdbs do
       show_info[:video_type].should == :tv_show
       show_info[:plot].should == 'The survivors of a plane crash are forced to live with each other on a remote island, a dangerous new world that poses unique threats of its own.'
       show_info[:tagline].should == "Destiny Calls (Season 5)"
-      # TODO should be a list, see below
+      pending "Having problems with strip"
       show_info[:language].first.should == 'English'
       show_info[:runtime].should == 42
       show_info[:genre].should == ['Adventure', 'Drama', 'Mystery', 'Sci-Fi', 'Thriller']      
@@ -185,7 +186,57 @@ describe YayImdbs do
     end  
   
   end  
-  
+ 
+  context :title_and_year_from_meta do
+    it 'should handle standard movie titles' do
+      html = '''
+        <html>
+          <head>
+            <meta name="title" content="Avatar (2009) - IMDb">
+           </head>
+        </html>
+      '''
+      
+      YayImdbs.send(:get_title_and_year_from_meta, Nokogiri::HTML(html)).should == ["Avatar", 2009]
+    end
+
+    it 'should handle tv shows' do
+      html = '''
+        <html>
+          <head>
+            <meta name="title" content="Lost (TV Series 2004–2010) - IMDb">
+           </head>
+        </html>
+      '''
+      
+      YayImdbs.send(:get_title_and_year_from_meta, Nokogiri::HTML(html)).should == ["Lost", 2004]
+    end   
+
+    it 'should handle videos' do
+      html = '''
+        <html>
+          <head>
+            <meta name="title" content="Lost Boys: The Thirst (Video 2010) - IMDb">
+           </head>
+        </html>
+      '''
+      
+      YayImdbs.send(:get_title_and_year_from_meta, Nokogiri::HTML(html)).should == ["Lost Boys: The Thirst", 2010]
+    end
+
+    it 'should handle mini series' do
+      html = '''
+        <html>
+          <head>
+            <meta name="title" content="The Lost Boys (TV mini-series 1978) - IMDb">
+           </head>
+        </html>
+      '''
+      
+      YayImdbs.send(:get_title_and_year_from_meta, Nokogiri::HTML(html)).should == ["The Lost Boys", 1978]
+    end    
+  end
+
   def stubbed_page_result(stub_file)
     open(File.join(File.dirname(__FILE__), stub_file)) { |f| Nokogiri::HTML(f) }
   end
