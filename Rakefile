@@ -14,7 +14,7 @@ task :default => ["spec"]
 spec = Gem::Specification.new do |s|
 
   s.name              = "yayimdbs"
-  s.version           = "0.1.6"
+  s.version           = "0.1.7"
   s.summary           = "Yet Another Ying IMDB Scraper"
   s.description       = "A simple imdb scraper built on Nokogiri for ruby 1.9+"
   s.author            = "Sam Cavenagh"
@@ -64,6 +64,7 @@ task :download_spec_html do
   page_into_file('http://www.imdb.com/title/tt0411008/', 'spec/Lost.2004.html')
   page_into_file('http://www.imdb.com/title/tt0411008/episodes/', 'spec/Lost.2004.Episodes.html')
   page_into_file('http://www.imdb.com/find?s=all&q=starkey+and+hutch', 'spec/starkey_hutch_search.html')
+  page_into_file('http://www.imdb.com/media/rm815832320/tt0093437', 'spec/media_page.html')
 end
 
 def page_into_file(request_url, file_name)

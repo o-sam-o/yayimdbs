@@ -90,7 +90,11 @@ describe YayImdbs do
   end
   
   context 'should determine content type' do
-  
+ 
+    before(:each) do
+      YayImdbs.stub(:get_media_page).and_return(stubbed_page_result('media_page.html'))
+     end
+
     it 'should detect tv show type' do
       imdb_id = '0411008'
       YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Lost.2004.html'))
@@ -109,7 +113,11 @@ describe YayImdbs do
   end
   
   context 'should scrap info from imdb' do
-  
+ 
+    before(:each) do
+      YayImdbs.stub(:get_media_page).and_return(stubbed_page_result('media_page.html'))
+     end
+
     it 'should retrive the metadata for a movie' do
       imdb_id = '0499549'
       YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Avatar.2009.html'))
@@ -121,7 +129,7 @@ describe YayImdbs do
       movie_info[:release_date].should == Date.new(y=2009,m=12,d=17)
       movie_info[:plot].should == 'A paraplegic marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.'
       movie_info[:director].should == 'James Cameron'
-      movie_info[:tagline].should == 'Return to Pandora'
+      movie_info[:tagline].should == 'Enter the World'
       pending "Having problems with strip"
       movie_info[:language].first.should == 'English'
       movie_info[:runtime].should == 162
@@ -138,7 +146,7 @@ describe YayImdbs do
       show_info[:year].sort.first.should == 2004
       show_info[:video_type].should == :tv_show
       show_info[:plot].should == 'The survivors of a plane crash are forced to live with each other on a remote island, a dangerous new world that poses unique threats of its own.'
-      show_info[:tagline].should == "Destiny Calls (Season 5)"
+      show_info[:tagline].should == "Us vs. Them (Season 3)"
       pending "Having problems with strip"
       show_info[:language].first.should == 'English'
       show_info[:runtime].should == 42
@@ -162,7 +170,22 @@ describe YayImdbs do
       series_2_ep_5[:plot].should == %q{A desperate and growingly insane Michael sets off into the jungle by himself determined to find Walt, but discovers that he is not alone. Meanwhile, Sawyer and Jin are ordered by their captors, the tail crash survivors, to take them to their camp. But they are delayed when Jin and the hulking Mr. Eko are forced to go into the jungle to look for Michael before the dreaded "others" find him first. Back at the beach camp, Sun frantically searches for her missing wedding ring which triggers flashbacks to Sun and Jin's past showing how they met for the first time in early 1990s Seoul, when Jin was working as a doorman of a fancy hotel where Sun was staying at for a courtship engagement set up by her mother.}
       series_2_ep_5[:date].should == Date.new(y=2005,m=10,d=19)
     end  
-  
+
+    it 'should retrive the poster urls' do
+      imdb_id = '0499549'
+      YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Avatar.2009.html'))
+      movie_info = YayImdbs.scrap_movie_info(imdb_id)
+      
+      movie_info[:title].should == 'Avatar'
+      movie_info[:year].should == 2009
+
+      movie_info[:small_image].should_not be_nil
+      movie_info[:small_image].should match /^http.*imdb.*/
+
+      movie_info[:large_image].should_not be_nil
+      movie_info[:large_image].should match /^http.*imdb.*/
+    end
+
     it 'should be possible to access movie info by string or symbol' do
       imdb_id = '0499549'
       YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Avatar.2009.html'))
@@ -175,14 +198,6 @@ describe YayImdbs do
   
     it 'should return a list of languages for a movie' do
       pending "Currently returns english or the first language found"
-    end  
-  
-    it 'should get a image thumbnail url' do
-      pending 'This has been implemented but there is not spec'
-    end  
-    
-    it 'should get a large image url' do
-      pending 'This has been implemented but there is no spec'
     end  
   
   end  

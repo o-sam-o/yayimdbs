@@ -115,15 +115,18 @@ class YayImdbs
   
   
     #scrap poster image urls
-    thumb = doc.xpath("//div[@class = 'photo']/a/img")
+    thumb = doc.xpath("//td[@id = 'img_primary']/a/img")
     if thumb.first
       thumbnail_url = thumb.first['src']
       if not thumbnail_url =~ /addposter.jpg$/ 
-        info_hash['small_image'] = thumbnail_url
+        info_hash['medium_image'] = thumbnail_url
+
+        # Small thumbnail image, gotten by hacking medium url
+        info_hash['small_image'] = thumbnail_url.sub(/@@.*$/, '@@._V1._SX120_120,160_.jpg')
       
         #Try to scrap a larger version of the image url
-        large_img_page = doc.xpath("//div[@class = 'photo']/a").first['href']
-        large_img_doc = Nokogiri::HTML(open('http://www.imdb.com' + large_img_page))
+        large_img_page = doc.xpath("//td[@id = 'img_primary']/a").first['href']
+        large_img_doc = self.get_media_page(large_img_page) 
         large_img_url = large_img_doc.xpath("//img[@id = 'primary-img']").first['src'] unless large_img_doc.xpath("//img[@id = 'primary-img']").empty?
         info_hash['large_image'] = large_img_url
       end
@@ -152,16 +155,20 @@ class YayImdbs
 
   private
     def self.get_search_page(name)
-      return Nokogiri::HTML(open(IMDB_SEARCH_URL + URI.escape(name)))
+      Nokogiri::HTML(open(IMDB_SEARCH_URL + URI.escape(name)))
     end
 
     def self.get_movie_page(imdb_id)
-      return Nokogiri::HTML(open(IMDB_MOVIE_URL + imdb_id))
+      Nokogiri::HTML(open(IMDB_MOVIE_URL + imdb_id))
     end
 
     def self.get_episodes_page(imdb_id)
-      return Nokogiri::HTML(open(IMDB_MOVIE_URL + imdb_id + '/episodes'))
+      Nokogiri::HTML(open(IMDB_MOVIE_URL + imdb_id + '/episodes'))
     end
+
+    def self.get_media_page(url_fragment)
+      Nokogiri::HTML(open(IMDB_BASE_URL + url_fragment))
+     end
 
     def self.get_title_and_year_from_meta(doc)
       return nil, nil unless doc.xpath("//meta[@name='title']").first
