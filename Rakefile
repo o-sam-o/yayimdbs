@@ -14,7 +14,7 @@ task :default => ["spec"]
 spec = Gem::Specification.new do |s|
 
   s.name              = "yayimdbs"
-  s.version           = "0.1.7"
+  s.version           = "0.1.8"
   s.summary           = "Yet Another Ying IMDB Scraper"
   s.description       = "A simple imdb scraper built on Nokogiri for ruby 1.9+"
   s.author            = "Sam Cavenagh"
@@ -34,7 +34,7 @@ spec = Gem::Specification.new do |s|
   s.add_dependency("tzinfo", ">= 0.3.22")
   s.add_dependency("i18n", ">= 0.4.1")
   
-  s.add_development_dependency("rspec", ">= 1.3.1")
+  s.add_development_dependency("rspec", ">= 2.0.0")
 
 end
 

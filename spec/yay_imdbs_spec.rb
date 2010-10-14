@@ -201,7 +201,34 @@ describe YayImdbs do
     end  
   
   end  
- 
+
+  context :scrap_images do
+    it 'should not set image if no picture image is encounted' do
+      html = '''
+        <html>
+          <body>
+            <table border="0" cellpadding="0" cellspacing="0" id="title-overview-widget-layout">
+            <tbody><tr>
+            <td rowspan="2" id="img_primary">
+            
+            <a>
+              <img src="http://i.media-imdb.com/images/SFb1690fcbf083b9bf07c2d17412f72229/nopicture/large/film.png" height="314" width="214" 
+                  alt="Add a poster for Tales of an Ancient Empire" title="Add a poster for Tales of an Ancient Empire">
+            </a>
+
+            </td>
+            </tr></tbody>
+            </table>
+          </body>
+         </html>
+      '''
+      info_hash = {}.with_indifferent_access
+
+      YayImdbs.send(:scrap_images, Nokogiri::HTML(html), info_hash)
+      info_hash.should be_empty
+    end 
+  end
+
   context :title_and_year_from_meta do
     it 'should handle standard movie titles' do
       html = '''

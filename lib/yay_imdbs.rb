@@ -61,7 +61,7 @@ class YayImdbs
   end  
 
   def self.scrap_movie_info(imdb_id)
-    info_hash = {}.with_indifferent_access
+    info_hash = {:imdb_id => imdb_id}.with_indifferent_access
   
     doc = self.get_movie_page(imdb_id)
     info_hash['title'], info_hash['year'] = get_title_and_year_from_meta(doc)
@@ -113,12 +113,23 @@ class YayImdbs
       raise "No info divs found for imdb id #{imdb_id}"
     end
   
+    self.scrap_images(doc, info_hash)
   
+    #scrap episodes if tv series
+    if info_hash.has_key?('season')
+      self.scrap_episodes(doc, info_hash)
+    end
+  
+    return info_hash 
+  end
+
+  private
+   def self.scrap_images(doc, info_hash)
     #scrap poster image urls
     thumb = doc.xpath("//td[@id = 'img_primary']/a/img")
     if thumb.first
       thumbnail_url = thumb.first['src']
-      if not thumbnail_url =~ /addposter.jpg$/ 
+      if not thumbnail_url =~ /\/nopicture\// 
         info_hash['medium_image'] = thumbnail_url
 
         # Small thumbnail image, gotten by hacking medium url
@@ -131,11 +142,11 @@ class YayImdbs
         info_hash['large_image'] = large_img_url
       end
     end
-  
-    #scrap episodes if tv series
-    if info_hash.has_key?('season')
+   end
+
+   def self.scrap_episodes(doc, info_hash)
       episodes = []
-      doc = self.get_episodes_page(imdb_id)
+      doc = self.get_episodes_page(info_hash[:imdb_id])
       episode_divs = doc.css(".filter-all")
       episode_divs.each do |e_div|
         if e_div.xpath('.//h3').inner_text =~ /Season (\d+), Episode (\d+):/
@@ -148,12 +159,8 @@ class YayImdbs
         end
       end
       info_hash['episodes'] = episodes
-    end
-  
-    return info_hash 
-  end
+   end
 
-  private
     def self.get_search_page(name)
       Nokogiri::HTML(open(IMDB_SEARCH_URL + URI.escape(name)))
     end
