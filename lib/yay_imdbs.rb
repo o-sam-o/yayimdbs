@@ -2,8 +2,14 @@
 require 'open-uri'
 require 'nokogiri'
 
-require 'active_support/core_ext/object'
-require 'active_support/core_ext/hash/indifferent_access.rb'
+begin
+  # Rails 3
+  require 'active_support/core_ext/object'
+  require 'active_support/core_ext/hash/indifferent_access.rb'
+rescue
+  # Rails 2.3
+  require 'active_support/all'
+end
 
 class YayImdbs 
   IMDB_BASE_URL = 'http://www.imdb.com/'
