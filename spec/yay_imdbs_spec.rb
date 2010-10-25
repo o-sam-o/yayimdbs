@@ -129,11 +129,11 @@ describe YayImdbs do
       movie_info[:release_date].should == Date.new(y=2009,m=12,d=17)
       movie_info[:plot].should == 'A paraplegic marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.'
       movie_info[:director].should == 'James Cameron'
-      movie_info[:tagline].should == 'Enter the World'
-      pending "Having problems with strip"
+      movie_info[:tagline].should == 'Return to Pandora'
       movie_info[:language].first.should == 'English'
       movie_info[:runtime].should == 162
-      movie_info[:genre].should == ['Action', 'Adventure', 'Sci-Fi']
+      movie_info[:mpaa].should == 'Rated PG-13 for intense epic battle sequences and warfare, sensuality, language and some smoking. (also special edition)'
+      movie_info[:genre].should == ['Action', 'Adventure', 'Fantasy', 'Sci-Fi']
     end  
   
     it 'should retrieve metadata for a tv show' do
@@ -143,18 +143,17 @@ describe YayImdbs do
       show_info = YayImdbs.scrap_movie_info(imdb_id)
       
       show_info[:title].should == 'Lost'
-      show_info[:year].sort.first.should == 2004
+      show_info[:year].should == 2004
       show_info[:video_type].should == :tv_show
       show_info[:plot].should == 'The survivors of a plane crash are forced to live with each other on a remote island, a dangerous new world that poses unique threats of its own.'
-      show_info[:tagline].should == "Us vs. Them (Season 3)"
-      pending "Having problems with strip"
+      show_info[:tagline].should == "Don't Tell Them What They Can't Do"
       show_info[:language].first.should == 'English'
       show_info[:runtime].should == 42
       show_info[:genre].should == ['Adventure', 'Drama', 'Mystery', 'Sci-Fi', 'Thriller']      
       
       show_info[:episodes].should_not be_nil
       show_info[:episodes].should_not be_empty
-      show_info[:episodes].length.should == 116
+      show_info[:episodes].length.should == 114
       
       series_2_ep_5 = nil
       show_info[:episodes].each do |episode|

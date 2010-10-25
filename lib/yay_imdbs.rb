@@ -1,7 +1,9 @@
 # encoding: UTF-8
 require 'open-uri'
 require 'nokogiri'
-require 'active_support/all'
+
+require 'active_support/core_ext/object'
+require 'active_support/core_ext/hash/indifferent_access.rb'
 
 class YayImdbs 
   IMDB_BASE_URL = 'http://www.imdb.com/'
@@ -74,10 +76,10 @@ class YayImdbs
     info_hash[:plot] = doc.xpath("//td[@id='overview-top']/p[2]").inner_text.strip
 
     found_info_divs = false
-    doc.xpath("//div[@class='txt-block']").each do |div|
-      next if div.xpath(".//h4").empty?
+    doc.xpath("//div/h4").each do |h4|
+      div = h4.parent
       found_info_divs = true
-      raw_key = div.xpath(".//h4").first.inner_text
+      raw_key = h4.inner_text
       key = raw_key.sub(':', '').strip.downcase
       value = div.inner_text[((div.inner_text =~ /#{Regexp.escape(raw_key)}/) + raw_key.length).. -1]
       value = value.gsub(/\302\240\302\273/u, '').strip.gsub(/(See more)|(see all)$/, '').strip
@@ -95,15 +97,24 @@ class YayImdbs
         else
           p "Unexpected runtime format #{value} for movie #{imdb_id}"
         end
-      elsif key == 'genre'
-        value = value.strip.split
+      elsif key == 'genres'
+        value = value.split('|').collect { |l| l.gsub(/[^a-zA-Z0-9\-]/, '') }
+        # Backwards compatibility hack
+        info_hash[:genre] = value
       elsif key == 'year'
         value = value.split('|').collect { |l| l.strip.to_i }.reject { |y| y <= 0 }
+        # TV shows can have multiple years
+        info_hash[:years] = value
+        value = value.sort.first
       elsif key == 'language'
-        value = value.split('|').collect { |l| l.strip }
+        value = value.split('|').collect { |l| l.gsub(/[^a-zA-Z0-9]/, '') }
       elsif key == 'taglines'
         # Backwards compatibility
         info_hash['tagline'] = value
+      elsif key == 'motion picture rating (mpaa)'
+        value = value.gsub(/See all certifications/, '').strip
+        # Backwards compatibility FIXME do with a map
+        info_hash['mpaa'] = value
       end
       info_hash[key.downcase.gsub(/\s/, '_')] = value
     end
@@ -117,7 +128,7 @@ class YayImdbs
   
     #scrap episodes if tv series
     if info_hash.has_key?('season')
-      self.scrap_episodes(doc, info_hash)
+      self.scrap_episodes(info_hash)
     end
   
     return info_hash 
@@ -144,15 +155,16 @@ class YayImdbs
     end
    end
 
-   def self.scrap_episodes(doc, info_hash)
+   def self.scrap_episodes(info_hash)
       episodes = []
       doc = self.get_episodes_page(info_hash[:imdb_id])
       episode_divs = doc.css(".filter-all")
       episode_divs.each do |e_div|
         if e_div.xpath('.//h3').inner_text =~ /Season (\d+), Episode (\d+):/
           episode = {"series" => $1.to_i, "episode" => $2.to_i, "title" => $'.strip}
-          if e_div.xpath(".//td").inner_text =~ /(\d+ (January|February|March|April|May|June|July|August|September|October|November|December) \d{4})/
-            episode['date'] = Date.parse($1)
+          raw_date = e_div.xpath('.//span/strong').inner_text.strip
+          episode['date'] = Date.parse(raw_date)
+          if e_div.inner_text =~ /#{raw_date}/
             episode['plot'] = $'.strip
           end
           episodes << episode

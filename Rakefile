@@ -29,10 +29,7 @@ spec = Gem::Specification.new do |s|
   s.require_paths     = ["lib"]
 
   s.add_dependency("nokogiri", ">= 1.4.2")
-
   s.add_dependency("activesupport", ">= 3.0.0")
-  s.add_dependency("tzinfo", ">= 0.3.22")
-  s.add_dependency("i18n", ">= 0.4.1")
   
   s.add_development_dependency("rspec", ">= 2.0.0")
 
@@ -62,7 +59,7 @@ desc "Re-download imdb sample pages used in specs (Do this when imdb updates)"
 task :download_spec_html do
   page_into_file('http://www.imdb.com/title/tt0499549/', 'spec/Avatar.2009.html')
   page_into_file('http://www.imdb.com/title/tt0411008/', 'spec/Lost.2004.html')
-  page_into_file('http://www.imdb.com/title/tt0411008/episodes/', 'spec/Lost.2004.Episodes.html')
+  page_into_file('http://www.imdb.com/title/tt0411008/episodes', 'spec/Lost.2004.Episodes.html')
   page_into_file('http://www.imdb.com/find?s=all&q=starkey+and+hutch', 'spec/starkey_hutch_search.html')
   page_into_file('http://www.imdb.com/media/rm815832320/tt0093437', 'spec/media_page.html')
 end
