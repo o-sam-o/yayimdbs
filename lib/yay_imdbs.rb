@@ -89,6 +89,7 @@ class YayImdbs
       info_hash[:video_type] = self.video_type_from_meta(doc)
       
       info_hash[:plot] = doc.xpath("//td[@id='overview-top']/p[2]").inner_text.strip
+      info_hash[:rating] = doc.at_css('.rating-rating').content.gsub(/\/.*/, '').to_f rescue nil
 
       found_info_divs = false
       movie_properties(doc) do |key, value|

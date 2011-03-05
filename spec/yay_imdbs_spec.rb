@@ -204,7 +204,26 @@ describe YayImdbs do
       movie_info[:language].should == ['English', 'Spanish']
       movie_info[:languages].should == ['English', 'Spanish']
     end
-  
+
+    context 'should scrap rating' do
+      it 'for avatar' do
+        imdb_id = '0499549'
+        YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Avatar.2009.html'))
+        movie_info = YayImdbs.scrap_movie_info(imdb_id)
+
+        movie_info[:rating].should == 8.2
+      end
+
+      it 'for lost' do
+        imdb_id = '0411008'
+        YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Lost.2004.html'))
+        YayImdbs.should_receive(:get_episodes_page).with(imdb_id).and_return(stubbed_page_result('Lost.2004.Episodes.html'))
+        show_info = YayImdbs.scrap_movie_info(imdb_id)
+
+        show_info[:rating].should == 8.6
+      end
+    end
+
   end  
 
   context :scrap_images do
