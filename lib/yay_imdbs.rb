@@ -18,6 +18,11 @@ class YayImdbs
 
   STRIP_WHITESPACE = /(\s{2,}|\n|\||\302\240\302\273)/u
 
+  DATE_PROPERTIES = [:release_date]
+  LIST_PROPERTIES = [:genres, :plot_keywords, :country, :sound_mix, :language]
+  INT_LIST_PROPERTIES = [:year, :season]
+  PROPERTY_ALIAS  = {:genres => :genre, :taglines => :tagline, :year => :years, :season => :seasons, :motion_picture_rating_mpaa => :mpaa}
+
   class << self
 
     def search_for_imdb_id(name, year=nil, type=nil)
@@ -70,72 +75,71 @@ class YayImdbs
       info_hash = {:imdb_id => imdb_id}.with_indifferent_access
     
       doc = self.get_movie_page(imdb_id)
-      info_hash['title'], info_hash['year'] = get_title_and_year_from_meta(doc)
+      title, year = get_title_and_year_from_meta(doc)
+      info_hash[:title], info_hash[:year] = title, year
       if info_hash['title'].nil?
         #If we cant get title and year something is wrong
         raise "Unable to find title or year for imdb id #{imdb_id}"
       end
-      info_hash['video_type'] = self.video_type_from_meta(doc)
+      info_hash[:video_type] = self.video_type_from_meta(doc)
       
       info_hash[:plot] = doc.xpath("//td[@id='overview-top']/p[2]").inner_text.strip
 
       found_info_divs = false
-      doc.xpath("//div/h4").each do |h4|
-        div = h4.parent
+      movie_properties(doc) do |key, value| 
         found_info_divs = true
-        raw_key = h4.inner_text
-        key = raw_key.sub(':', '').strip.downcase
-        value = div.inner_text[((div.inner_text =~ /#{Regexp.escape(raw_key)}/) + raw_key.length).. -1]
-        value = value.gsub(/\302\240\302\273/u, '').strip.gsub(/(See more)|(see all)$/, '').strip
-        
-        if key == 'release date'
+        if DATE_PROPERTIES.include?(key)
           begin
             value = Date.strptime(value, '%d %B %Y')
           rescue 
-            p "Invalid date '#{value}' for imdb id: #{imdb_id}"
+            info_hash["raw_#{key}"] = value
             value = nil
           end
-        elsif key == 'runtime'
+         elsif key == :runtime
           if value =~ /(\d+)\smin/
             value = $1.to_i
           else
-            p "Unexpected runtime format #{value} for movie #{imdb_id}"
+            info_hash[:raw_runtime] = value
+            value = nil
           end
-        elsif key == 'genres'
+        elsif LIST_PROPERTIES.include?(key)
           value = value.split('|').collect { |l| l.gsub(/[^a-zA-Z0-9\-]/, '') }
-          # Backwards compatibility hack
-          info_hash[:genre] = value
-        elsif key == 'year'
+        elsif INT_LIST_PROPERTIES.include?(key)
           value = value.split('|').collect { |l| l.strip.to_i }.reject { |y| y <= 0 }
-          # TV shows can have multiple years
-          info_hash[:years] = value
-          value = value.sort.first
-        elsif key == 'language'
-          value = value.split('|').collect { |l| l.gsub(/[^a-zA-Z0-9]/, '') }
-        elsif key == 'taglines'
-          # Backwards compatibility
-          info_hash['tagline'] = value
-        elsif key == 'motion picture rating (mpaa)'
-          value = value.gsub(/See all certifications/, '').strip
-          # Backwards compatibility FIXME do with a map
-          info_hash['mpaa'] = value
         end
-        info_hash[key.downcase.gsub(/\s/, '_')] = value
+        info_hash[key] = value
+        info_hash[PROPERTY_ALIAS[key]] = value if PROPERTY_ALIAS[key]
       end
-    
+      # Hack tv shows can have a year property, which is a list, fixing ...
+      info_hash[:year] = year
+
       if not found_info_divs
         #If we don't find any info divs assume parsing failed
         raise "No info divs found for imdb id #{imdb_id}"
       end
-    
+
       self.scrap_images(doc, info_hash)
-    
+
       #scrap episodes if tv series
       if info_hash.has_key?('season')
         self.scrap_episodes(info_hash)
       end
-    
-      return info_hash 
+
+      return info_hash
+    end
+
+    def movie_properties(doc)
+      doc.xpath("//div/h4").each do |h4|
+        div = h4.parent
+        raw_key = h4.inner_text
+        key = raw_key.sub(':', '').strip.downcase
+        value = div.inner_text[((div.inner_text =~ /#{Regexp.escape(raw_key)}/) + raw_key.length).. -1]
+        value = value.gsub(/\302\240\302\273/u, '').strip.gsub(/(See more)|(see all)|(See all certifications)$/, '').strip
+
+        symbol_key = key.downcase.gsub(/[^a-zA-Z0-9 ]/, '').gsub(/\s/, '_').to_sym
+
+        yield symbol_key, value
+      end
     end
 
      def scrap_images(doc, info_hash)
@@ -148,7 +152,7 @@ class YayImdbs
 
           # Small thumbnail image, gotten by hacking medium url
           info_hash['small_image'] = thumbnail_url.sub(/@@.*$/, '@@._V1._SX120_120,160_.jpg')
-        
+
           #Try to scrap a larger version of the image url
           large_img_page = doc.xpath("//td[@id = 'img_primary']/a").first['href']
           large_img_doc = self.get_media_page(large_img_page) 
