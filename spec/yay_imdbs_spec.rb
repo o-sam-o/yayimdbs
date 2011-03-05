@@ -197,8 +197,13 @@ describe YayImdbs do
     end
   
     it 'should return a list of languages for a movie' do
-      pending "Currently returns english or the first language found"
-    end  
+      imdb_id = '0499549'
+      YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Avatar.2009.html'))
+      movie_info = YayImdbs.scrap_movie_info(imdb_id)
+
+      movie_info[:language].should == ['English', 'Spanish']
+      movie_info[:languages].should == ['English', 'Spanish']
+    end
   
   end  
 

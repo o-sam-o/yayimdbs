@@ -21,7 +21,12 @@ class YayImdbs
   DATE_PROPERTIES = [:release_date]
   LIST_PROPERTIES = [:genres, :plot_keywords, :country, :sound_mix, :language]
   INT_LIST_PROPERTIES = [:year, :season]
-  PROPERTY_ALIAS  = {:genres => :genre, :taglines => :tagline, :year => :years, :season => :seasons, :motion_picture_rating_mpaa => :mpaa}
+  PROPERTY_ALIAS  = {:genres => :genre, 
+                     :taglines => :tagline, 
+                     :year => :years, 
+                     :season => :seasons,
+                     :language => :languages,
+                     :motion_picture_rating_mpaa => :mpaa}
 
   class << self
 
@@ -86,37 +91,20 @@ class YayImdbs
       info_hash[:plot] = doc.xpath("//td[@id='overview-top']/p[2]").inner_text.strip
 
       found_info_divs = false
-      movie_properties(doc) do |key, value| 
+      movie_properties(doc) do |key, value|
         found_info_divs = true
-        if DATE_PROPERTIES.include?(key)
-          begin
-            value = Date.strptime(value, '%d %B %Y')
-          rescue 
-            info_hash["raw_#{key}"] = value
-            value = nil
-          end
-         elsif key == :runtime
-          if value =~ /(\d+)\smin/
-            value = $1.to_i
-          else
-            info_hash[:raw_runtime] = value
-            value = nil
-          end
-        elsif LIST_PROPERTIES.include?(key)
-          value = value.split('|').collect { |l| l.gsub(/[^a-zA-Z0-9\-]/, '') }
-        elsif INT_LIST_PROPERTIES.include?(key)
-          value = value.split('|').collect { |l| l.strip.to_i }.reject { |y| y <= 0 }
-        end
-        info_hash[key] = value
-        info_hash[PROPERTY_ALIAS[key]] = value if PROPERTY_ALIAS[key]
+        info_hash["raw_#{key}"] = value
+        info_hash[key] = clean_movie_property(key, value)
+        info_hash[PROPERTY_ALIAS[key]] = info_hash[key] if PROPERTY_ALIAS[key]
       end
-      # Hack tv shows can have a year property, which is a list, fixing ...
-      info_hash[:year] = year
 
       if not found_info_divs
         #If we don't find any info divs assume parsing failed
         raise "No info divs found for imdb id #{imdb_id}"
       end
+
+      # Hack: tv shows can have a year property, which is a list, fixing ...
+      info_hash[:year] = year
 
       self.scrap_images(doc, info_hash)
 
@@ -128,8 +116,25 @@ class YayImdbs
       return info_hash
     end
 
+    def clean_movie_property(key, value)
+      if DATE_PROPERTIES.include?(key)
+        value = Date.strptime(value, '%d %B %Y') rescue nil
+      elsif key == :runtime
+        if value =~ /(\d+)\smin/
+          value = $1.to_i
+        else
+          value = nil
+        end
+      elsif LIST_PROPERTIES.include?(key)
+        value = value.split('|').collect { |l| l.gsub(/[^a-zA-Z0-9\-]/, '') }
+      elsif INT_LIST_PROPERTIES.include?(key)
+        value = value.split('|').collect { |l| l.strip.to_i }.reject { |y| y <= 0 }
+      end
+      return value
+    end
+
     def movie_properties(doc)
-      doc.xpath("//div/h4").each do |h4|
+      doc.css("div h4").each do |h4|
         div = h4.parent
         raw_key = h4.inner_text
         key = raw_key.sub(':', '').strip.downcase
@@ -142,45 +147,41 @@ class YayImdbs
       end
     end
 
-     def scrap_images(doc, info_hash)
+    def scrap_images(doc, info_hash)
       #scrap poster image urls
-      thumb = doc.xpath("//td[@id = 'img_primary']/a/img")
-      if thumb.first
-        thumbnail_url = thumb.first['src']
-        if not thumbnail_url =~ /\/nopicture\// 
-          info_hash['medium_image'] = thumbnail_url
+      thumbnail_url = doc.at_css("td[id=img_primary] a img").try(:[], 'src')
+      return if thumbnail_url.nil? || thumbnail_url =~ /\/nopicture\//
 
-          # Small thumbnail image, gotten by hacking medium url
-          info_hash['small_image'] = thumbnail_url.sub(/@@.*$/, '@@._V1._SX120_120,160_.jpg')
+      info_hash['medium_image'] = thumbnail_url
+      # Small thumbnail image, gotten by hacking medium url
+      info_hash['small_image'] = thumbnail_url.sub(/@@.*$/, '@@._V1._SX120_120,160_.jpg')
 
-          #Try to scrap a larger version of the image url
-          large_img_page = doc.xpath("//td[@id = 'img_primary']/a").first['href']
-          large_img_doc = self.get_media_page(large_img_page) 
-          large_img_url = large_img_doc.xpath("//img[@id = 'primary-img']").first['src'] unless large_img_doc.xpath("//img[@id = 'primary-img']").empty?
-          info_hash['large_image'] = large_img_url
+      #Try to scrap a larger version of the image url
+      large_img_page_link = doc.at_css("td[id=img_primary] a").try(:[], 'href')
+      return unless large_img_page_link
+      large_img_doc = get_media_page(large_img_page_link) 
+      large_img_url = large_img_doc.at_css("img[id=primary-img]").try(:[], 'src')
+      info_hash['large_image'] = large_img_url
+    end
+
+    def scrap_episodes(info_hash)
+      episodes = []
+      doc = self.get_episodes_page(info_hash[:imdb_id])
+
+      doc.css(".filter-all").each do |e_div|
+        next unless e_div.at_css('h3').inner_text =~ /Season (\d+), Episode (\d+):/
+          episode = {"series" => $1.to_i, "episode" => $2.to_i, "title" => $'.strip}
+
+        raw_date = e_div.at_css('strong').inner_text.strip
+        episode['date'] = Date.parse(raw_date) rescue nil
+        if e_div.inner_text =~ /#{raw_date}/
+          episode['plot'] = $'.strip
         end
+
+        episodes << episode
       end
-     end
-
-     def scrap_episodes(info_hash)
-        episodes = []
-        doc = self.get_episodes_page(info_hash[:imdb_id])
-
-        doc.css(".filter-all").each do |e_div|
-          if e_div.at_css('h3').inner_text =~ /Season (\d+), Episode (\d+):/
-            episode = {"series" => $1.to_i, "episode" => $2.to_i, "title" => $'.strip}
-
-            raw_date = e_div.at_css('strong').inner_text.strip
-            episode['date'] = Date.parse(raw_date) rescue nil
-            if e_div.inner_text =~ /#{raw_date}/
-              episode['plot'] = $'.strip
-            end
-
-            episodes << episode
-          end
-        end
-        info_hash['episodes'] = episodes
-     end
+      info_hash['episodes'] = episodes
+    end
 
       def get_search_page(name)
         Nokogiri::HTML(open(IMDB_SEARCH_URL + URI.escape(name)))
