@@ -22,48 +22,44 @@ class YayImdbs
 
     def search_for_imdb_id(name, year=nil, type=nil)
       search_results = self.search_imdb(name)
-      return nil if search_results.empty?
-    
+
       search_results.each do |result|
         # Ensure result is the correct video type
         next if type && (result[:video_type] != type)
-      
+
         # If no year provided just return first result
-        return result[:imdb_id] if !year || result[:year] == year
+        return result[:imdb_id] if year.nil? || result[:year] == year
       end
-      return nil  
+      return nil
     end
 
     def search_imdb(search_term)
       search_results = []
     
       doc = self.get_search_page(search_term)
+
       # If the search is an exact match imdb will redirect to the movie page not search results page
       # we uses the title meta element to determine if we got an exact match
       movie_title, movie_year = get_title_and_year_from_meta(doc)
       if movie_title
-        canonical_link = doc.xpath("//link[@rel='canonical']")
-        if canonical_link && canonical_link.first['href'] =~ /tt(\d+)\//
-          return [:name => movie_title, :year => movie_year, :imdb_id => $1, :video_type => self.video_type_from_meta(doc)]
+        canonical_link = doc.at_css("link[rel='canonical']").try(:[], 'href')
+        if canonical_link && canonical_link =~ /tt(\d+)\//
+          return [:name => movie_title, :year => movie_year, :imdb_id => $1, :video_type => video_type_from_meta(doc)]
         else
           raise "Unable to extract imdb id from exact search result"
         end
       end
     
-      doc.xpath("//td").each do |td| 
-        td.xpath(".//a").each do |link|  
+      doc.css("td").each do |td| 
+        td.css("a").each do |link|
           href = link['href']
           current_name = link.content
 
-          # Ignore links with no text (e.g. image links)
-          next unless current_name.present?
-          current_name = self.clean_title(current_name)
-        
-          if href =~ /^\/title\/tt(\d+)/
-            imdb_id = $1
-            current_year = $1.gsub(/\(\)/, '').to_i if td.inner_text =~ /\((\d{4}\/?\w*)\)/
-            search_results << {:imdb_id => imdb_id, :name => current_name, :year => current_year, :video_type => self.video_type(td)}
-          end
+          # Ignore links with no text (e.g. image links) or links that don't link to movie pages
+          next unless current_name.present? && href =~ /^\/title\/tt(\d+)/
+          imdb_id = $1
+          current_year = $1.gsub(/\(\)/, '').to_i if td.inner_text =~ /\((\d{4}\/?\w*)\)/
+          search_results << {:imdb_id => imdb_id, :name => clean_title(current_name), :year => current_year, :video_type => video_type(td)}
         end
       end
     
@@ -165,15 +161,17 @@ class YayImdbs
      def scrap_episodes(info_hash)
         episodes = []
         doc = self.get_episodes_page(info_hash[:imdb_id])
-        episode_divs = doc.css(".filter-all")
-        episode_divs.each do |e_div|
-          if e_div.xpath('.//h3').inner_text =~ /Season (\d+), Episode (\d+):/
+
+        doc.css(".filter-all").each do |e_div|
+          if e_div.at_css('h3').inner_text =~ /Season (\d+), Episode (\d+):/
             episode = {"series" => $1.to_i, "episode" => $2.to_i, "title" => $'.strip}
-            raw_date = e_div.xpath('.//span/strong').inner_text.strip
-            episode['date'] = Date.parse(raw_date)
+
+            raw_date = e_div.at_css('strong').inner_text.strip
+            episode['date'] = Date.parse(raw_date) rescue nil
             if e_div.inner_text =~ /#{raw_date}/
               episode['plot'] = $'.strip
             end
+
             episodes << episode
           end
         end
