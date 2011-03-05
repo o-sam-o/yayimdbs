@@ -4,7 +4,7 @@ Overview
 --------
 Yet Another Ying IMDB Scraper
 
-This is a simple imdb scraper, that i created as part of my [onbox](http://github.com/o-sam-o/onbox) project.  I have moved it out into it's own gem so i can share it across projects.
+This is a simple imdb scraper, that I created as part of my [onbox](http://github.com/o-sam-o/onbox) project.  I have moved it out into it's own gem so I can share it across projects.
 
 Features
 --------
