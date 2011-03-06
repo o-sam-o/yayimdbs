@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{yayimdbs}
-  s.version = "0.2.0"
+  s.version = "0.2.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Sam Cavenagh"]
@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.description = %q{A simple imdb scraper built on Nokogiri for ruby 1.9+}
   s.email = %q{cavenaghweb@hotmail.com}
   s.extra_rdoc_files = ["README.md"]
-  s.files = ["README.md", "spec", "lib/yay_imdbs.rb"]
+  s.files = ["README.md", "spec", "lib/yay_imdbs.rb", "lib/yayimdbs.rb"]
   s.homepage = %q{http://github.com/o-sam-o/yayimdbs}
   s.rdoc_options = ["--main", "README.md"]
   s.require_paths = ["lib"]

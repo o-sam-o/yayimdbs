@@ -35,7 +35,7 @@ class YayImdbs
 
       search_results.each do |result|
         # Ensure result is the correct video type
-        next if type && (result[:video_type] != type)
+        next if type && (result[:video_type].to_s != type.to_s)
 
         # If no year provided just return first result
         return result[:imdb_id] if year.nil? || result[:year] == year
@@ -140,7 +140,7 @@ class YayImdbs
         raw_key = h4.inner_text
         key = raw_key.sub(':', '').strip.downcase
         value = div.inner_text[((div.inner_text =~ /#{Regexp.escape(raw_key)}/) + raw_key.length).. -1]
-        value = value.gsub(/\302\240\302\273/u, '').strip.gsub(/(See more)|(see all)|(See all certifications)$/, '').strip
+        value = value.gsub(/\302\240\302\273/u, '').strip.gsub(/(See more)|(see all)|(See all certifications)|(See full summary)$/, '').strip
 
         symbol_key = key.downcase.gsub(/[^a-zA-Z0-9 ]/, '').gsub(/\s/, '_').to_sym
 

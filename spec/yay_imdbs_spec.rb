@@ -1,6 +1,6 @@
 # encoding: UTF-8
 require 'rspec'
-require './lib/yay_imdbs'
+require File.dirname(__FILE__) + '/../lib/yayimdbs'
 describe YayImdbs do
   
   context 'should search for movie' do
@@ -31,7 +31,13 @@ describe YayImdbs do
       YayImdbs.should_receive(:get_search_page).with(movie_name).and_return(stubbed_page_result('starkey_hutch_search.html'))
       YayImdbs.search_for_imdb_id(movie_name, nil, :tv_show).should == '0072567'
     end  
-  
+
+    it 'should find tv show imdb id with name only (even is from pass for type)' do
+      movie_name = 'Starsky & Hutch'
+      YayImdbs.should_receive(:get_search_page).with(movie_name).and_return(stubbed_page_result('starkey_hutch_search.html'))
+      YayImdbs.search_for_imdb_id(movie_name, nil, 'tv_show').should == '0072567'
+    end  
+
     it 'should find the imdb id when search redirects directly to the movie page' do
       movie_name = 'Avatar'
       YayImdbs.should_receive(:get_search_page).with(movie_name).and_return(stubbed_page_result('Avatar.2009.html'))
