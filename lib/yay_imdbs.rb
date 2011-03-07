@@ -31,7 +31,7 @@ class YayImdbs
   class << self
 
     def search_for_imdb_id(name, year=nil, type=nil)
-      search_results = self.search_imdb(name)
+      search_results = search_imdb(name)
 
       search_results.each do |result|
         # Ensure result is the correct video type
@@ -46,7 +46,7 @@ class YayImdbs
     def search_imdb(search_term)
       search_results = []
     
-      doc = self.get_search_page(search_term)
+      doc = get_search_page(search_term)
 
       # If the search is an exact match imdb will redirect to the movie page not search results page
       # we uses the title meta element to determine if we got an exact match
@@ -79,14 +79,14 @@ class YayImdbs
     def scrap_movie_info(imdb_id)
       info_hash = {:imdb_id => imdb_id}.with_indifferent_access
     
-      doc = self.get_movie_page(imdb_id)
+      doc = get_movie_page(imdb_id)
       title, year = get_title_and_year_from_meta(doc)
       info_hash[:title], info_hash[:year] = title, year
       if info_hash['title'].nil?
         #If we cant get title and year something is wrong
         raise "Unable to find title or year for imdb id #{imdb_id}"
       end
-      info_hash[:video_type] = self.video_type_from_meta(doc)
+      info_hash[:video_type] = video_type_from_meta(doc)
       
       info_hash[:plot] = doc.xpath("//td[@id='overview-top']/p[2]").inner_text.strip
       info_hash[:rating] = doc.at_css('.rating-rating').content.gsub(/\/.*/, '').to_f rescue nil
@@ -99,7 +99,7 @@ class YayImdbs
         info_hash[PROPERTY_ALIAS[key]] = info_hash[key] if PROPERTY_ALIAS[key]
       end
 
-      if not found_info_divs
+      unless found_info_divs
         #If we don't find any info divs assume parsing failed
         raise "No info divs found for imdb id #{imdb_id}"
       end
@@ -107,12 +107,10 @@ class YayImdbs
       # Hack: tv shows can have a year property, which is a list, fixing ...
       info_hash[:year] = year
 
-      self.scrap_images(doc, info_hash)
+      scrap_images(doc, info_hash)
 
       #scrap episodes if tv series
-      if info_hash.has_key?('season')
-        self.scrap_episodes(info_hash)
-      end
+      scrap_episodes(info_hash) if info_hash.has_key?('season')
 
       return info_hash
     end
@@ -167,7 +165,7 @@ class YayImdbs
 
     def scrap_episodes(info_hash)
       episodes = []
-      doc = self.get_episodes_page(info_hash[:imdb_id])
+      doc = get_episodes_page(info_hash[:imdb_id])
 
       doc.css(".filter-all").each do |e_div|
         next unless e_div.at_css('h3').inner_text =~ /Season (\d+), Episode (\d+):/
@@ -204,7 +202,7 @@ class YayImdbs
         title_text = doc.at_css("meta[name='title']").try(:[], 'content')
         # Matches 'Movie Name (2010)' or 'Movie Name (2010/I)' or 'Lost (TV Series 2004–2010)'
         if title_text && title_text =~ /(.*) \([^\)0-9]*(\d{4})((\/\w*)|(.\d{4}))?\)/
-          movie_title = self.clean_title($1)
+          movie_title = clean_title($1)
           movie_year = $2.to_i
         end
         return movie_title, movie_year
