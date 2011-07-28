@@ -139,9 +139,10 @@ class YayImdbs
         key = raw_key.sub(':', '').strip.downcase
         value = div.inner_text[((div.inner_text =~ /#{Regexp.escape(raw_key)}/) + raw_key.length).. -1]
         value = value.gsub(/\302\240\302\273/u, '').strip.gsub(/(See more)|(see all)|(See all certifications)|(Add\/edit official sites)|(See full summary)$/, '').strip
-		
         symbol_key = key.downcase.gsub(/[^a-zA-Z0-9 ]/, '').gsub(/\s/, '_').to_sym
-
+		if symbol_key == :official_sites
+			value = div.inner_html.match(/href=\"(.*?)\"/)[1]
+		end
         yield symbol_key, value
       end
     end
