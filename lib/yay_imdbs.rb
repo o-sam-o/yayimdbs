@@ -26,7 +26,8 @@ class YayImdbs
                      :year => :years, 
                      :season => :seasons,
                      :language => :languages,
-                     :motion_picture_rating_mpaa => :mpaa}
+                     :motion_picture_rating_mpaa => :mpaa,
+					 :official_sites => :official_site}
 
   class << self
 
@@ -92,7 +93,7 @@ class YayImdbs
       info_hash[:rating] = doc.at_css('.rating-rating').content.gsub(/\/.*/, '').to_f rescue nil
 
       found_info_divs = false
-      movie_properties(doc) do |key, value|
+      movie_properties(doc, imdb_id) do |key, value|
         found_info_divs = true
         info_hash["raw_#{key}"] = value
         info_hash[key] = clean_movie_property(key, value)
@@ -132,7 +133,7 @@ class YayImdbs
       return value
     end
 
-    def movie_properties(doc)
+    def movie_properties(doc, imdb_id)
       doc.css("div h4").each do |h4|
         div = h4.parent
         raw_key = h4.inner_text
@@ -140,11 +141,17 @@ class YayImdbs
         value = div.inner_text[((div.inner_text =~ /#{Regexp.escape(raw_key)}/) + raw_key.length).. -1]
         value = value.gsub(/\302\240\302\273/u, '').strip.gsub(/(See more)|(see all)|(See all certifications)|(Add\/edit official sites)|(See full summary)$/, '').strip
         symbol_key = key.downcase.gsub(/[^a-zA-Z0-9 ]/, '').gsub(/\s/, '_').to_sym
-		if symbol_key == :official_sites
-			value = div.inner_html.match(/href=\"(.*?)\"/)[1]
-		end
+        value = get_official_site_url(value, imdb_id) if symbol_key == :official_sites
         yield symbol_key, value
       end
+    end
+	
+    def get_official_site_url(value, imdb_id)
+        value = value.match(/<a href="(.*?)">Official site<\/a>/)
+        if 
+            value = get_official_sites_page(imdb_id).inner_html.match(/<a href="(.*?)">Official site<\/a>/)
+        end
+        return $1
     end
 
     def scrap_images(doc, info_hash)
@@ -189,6 +196,10 @@ class YayImdbs
 
       def get_movie_page(imdb_id)
         Nokogiri::HTML(open(IMDB_MOVIE_URL + imdb_id))
+      end
+	  
+      def get_official_sites_page(imdb_id)
+        Nokogiri::HTML(open(IMDB_MOVIE_URL + imdb_id + '/officialsites'	))
       end
 
       def get_episodes_page(imdb_id)
