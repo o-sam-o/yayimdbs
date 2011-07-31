@@ -148,7 +148,7 @@ class YayImdbs
 	
     def get_official_site_url(value, imdb_id)
         value = value.match(/<a href="(.*?)">Official site<\/a>/)
-        if 
+        if value.nil?
             value = get_official_sites_page(imdb_id).inner_html.match(/<a href="(.*?)">Official site<\/a>/)
         end
         return $1
