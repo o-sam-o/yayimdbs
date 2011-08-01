@@ -2,3 +2,4 @@ pkg/*
 .DS_Store
 coverage/*
 .*.swp
+.bundle/config
