@@ -100,10 +100,10 @@ class YayImdbs
       info_hash[:rating] = doc.at_css('.rating-rating').content.gsub(/\/.*/, '').to_f rescue nil
 
       found_info_divs = false
-      movie_properties(doc, imdb_id) do |key, value|
+      movie_properties(doc) do |key, value|
         found_info_divs = true
         info_hash["raw_#{key}"] = value
-        info_hash[key] = clean_movie_property(key, value)
+        info_hash[key] = clean_movie_property(key, value, imdb_id)
         info_hash[PROPERTY_ALIAS[key]] = info_hash[key] if PROPERTY_ALIAS[key]
       end
 
@@ -123,7 +123,7 @@ class YayImdbs
       return info_hash
     end
 
-    def clean_movie_property(key, value)
+    def clean_movie_property(key, value, imdb_id)
       if DATE_PROPERTIES.include?(key)
         value = Date.strptime(value, '%d %B %Y') rescue nil
       elsif key == :runtime
@@ -132,6 +132,8 @@ class YayImdbs
         else
           value = nil
         end
+      elsif key == :official_sites
+        value = get_official_site_url(value, imdb_id)
       elsif LIST_PROPERTIES.include?(key)
         value = value.split('|').collect { |l| l.gsub(/[^a-zA-Z0-9\-]/, '') }
       elsif INT_LIST_PROPERTIES.include?(key)
@@ -140,20 +142,19 @@ class YayImdbs
       return value
     end
 
-    def movie_properties(doc, imdb_id)
+    def movie_properties(doc)
       doc.css("div h4").each do |h4|
         div = h4.parent
         raw_key = h4.inner_text
         key = raw_key.sub(':', '').strip.downcase
         value = div.inner_text[((div.inner_text =~ /#{Regexp.escape(raw_key)}/) + raw_key.length).. -1]
-        value = value.gsub(/\302\240\302\273/u, '').strip.gsub(/(See more)|(see all)|(See all certifications)|(Add\/edit official sites)|(See full summary)$/, '').strip
         value = value.gsub(/\302\240\302\273/u, '').strip.gsub(/(#{MORE_INFO_LINKS.join(')|(')})$/i, '').strip
         symbol_key = key.downcase.gsub(/[^a-zA-Z0-9 ]/, '').gsub(/\s/, '_').to_sym
-        value = get_official_site_url(value, imdb_id) if symbol_key == :official_sites
         yield symbol_key, value
       end
     end
-	
+
+    # TODO capture all official sites, not all sites have an "Official site" link (e.g. Lost)
     def get_official_site_url(value, imdb_id)
         value = value.match(/<a href="(.*?)">Official site<\/a>/)
         if value.nil?
@@ -189,9 +190,9 @@ class YayImdbs
 
         raw_date = e_div.at_css('strong').inner_text.strip
         episode['date'] = Date.parse(raw_date) rescue nil
-        if e_div.inner_text =~ /#{raw_date}/
-          episode['plot'] = $'.strip
-        end
+
+        # Seems that the day can sometimes be ???? which doesnt play will with regex
+        episode['plot'] = $'.strip if e_div.inner_text =~ /#{raw_date}/ rescue nil
 
         episodes << episode
       end

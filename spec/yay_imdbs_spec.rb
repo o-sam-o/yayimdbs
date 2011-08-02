@@ -90,6 +90,7 @@ describe YayImdbs do
  
     before(:each) do
       YayImdbs.stub(:get_media_page).and_return(stubbed_page_result('media_page.html'))
+      YayImdbs.stub(:get_official_sites_page).and_return(stubbed_page_result('avatar_officialsites.html'))
      end
 
     it 'should detect tv show type' do
@@ -113,6 +114,7 @@ describe YayImdbs do
  
     before(:each) do
       YayImdbs.stub(:get_media_page).and_return(stubbed_page_result('media_page.html'))
+      YayImdbs.stub(:get_official_sites_page).and_return(stubbed_page_result('avatar_officialsites.html'))
      end
 
     it 'should retrive the metadata for a movie' do
@@ -134,8 +136,10 @@ describe YayImdbs do
       end
       movie_info[:language].first.should == 'English'
       movie_info[:runtime].should == 162
-      movie_info[:mpaa].should == 'Rated PG-13 for intense epic battle sequences and warfare, sensuality, language and some smoking. (also special edition)'
+      movie_info[:mpaa].should == 'Rated PG-13 for intense epic battle sequences and warfare, sensuality, language and some smoking'
       movie_info[:genre].should == ['Action', 'Adventure', 'Fantasy', 'Sci-Fi']
+
+      movie_info[:official_sites].should == 'http://www.avatarmovie.com/'
     end  
   
     it 'should retrieve metadata for a tv show' do
@@ -152,22 +156,25 @@ describe YayImdbs do
       begin
         show_info[:tagline].should == "Don't Tell Them What They Can't Do"
       rescue
-        show_info[:tagline].should == "The truth will be revealed (Season 2)"
+        begin
+          show_info[:tagline].should == "The truth will be revealed (Season 2)"
+        rescue
+          show_info[:tagline].should == "Us vs. Them (Season 3)"
+        end
       end
       show_info[:language].first.should == 'English'
       show_info[:runtime].should == 42
-      show_info[:genre].should == ['Adventure', 'Drama', 'Mystery', 'Sci-Fi', 'Thriller']      
+      show_info[:genre].should == ['Adventure', 'Drama', 'Mystery', 'Sci-Fi', 'Thriller']
       
       show_info[:episodes].should_not be_nil
       show_info[:episodes].should_not be_empty
-      show_info[:episodes].length.should == 114
+      show_info[:episodes].length.should == 115
       
       series_2_ep_5 = nil
       show_info[:episodes].each do |episode|
         episode[:series].should_not be_nil
         episode[:episode].should_not be_nil
         episode[:title].should_not be_nil
-        episode[:date].should_not be_nil
 
         series_2_ep_5 = episode if episode[:series] == 2 && episode[:episode] == 5
       end      
@@ -217,7 +224,7 @@ describe YayImdbs do
         YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Avatar.2009.html'))
         movie_info = YayImdbs.scrap_movie_info(imdb_id)
 
-        movie_info[:rating].should == 8.2
+        movie_info[:rating].should == 8.1
       end
 
       it 'for lost' do
@@ -226,7 +233,7 @@ describe YayImdbs do
         YayImdbs.should_receive(:get_episodes_page).with(imdb_id).and_return(stubbed_page_result('Lost.2004.Episodes.html'))
         show_info = YayImdbs.scrap_movie_info(imdb_id)
 
-        show_info[:rating].should == 8.6
+        show_info[:rating].should == 8.5
       end
     end
 
