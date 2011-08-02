@@ -18,6 +18,13 @@ class YayImdbs
 
   STRIP_WHITESPACE = /(\s{2,}|\n|\||\302\240\302\273)/u
 
+  MORE_INFO_LINKS = ['See more',
+                     'Add/edit official sites',
+                     'See all certifications',
+                     'See full summary',
+                     'see all',
+                    ]
+
   DATE_PROPERTIES = [:release_date]
   LIST_PROPERTIES = [:genres, :plot_keywords, :country, :sound_mix, :language]
   INT_LIST_PROPERTIES = [:year, :season]
@@ -140,6 +147,7 @@ class YayImdbs
         key = raw_key.sub(':', '').strip.downcase
         value = div.inner_text[((div.inner_text =~ /#{Regexp.escape(raw_key)}/) + raw_key.length).. -1]
         value = value.gsub(/\302\240\302\273/u, '').strip.gsub(/(See more)|(see all)|(See all certifications)|(Add\/edit official sites)|(See full summary)$/, '').strip
+        value = value.gsub(/\302\240\302\273/u, '').strip.gsub(/(#{MORE_INFO_LINKS.join(')|(')})$/i, '').strip
         symbol_key = key.downcase.gsub(/[^a-zA-Z0-9 ]/, '').gsub(/\s/, '_').to_sym
         value = get_official_site_url(value, imdb_id) if symbol_key == :official_sites
         yield symbol_key, value
