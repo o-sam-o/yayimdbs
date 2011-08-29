@@ -291,6 +291,18 @@ describe YayImdbs do
       YayImdbs.send(:get_title_and_year_from_meta, Nokogiri::HTML(html)).should == ["Lost", 2004]
     end   
 
+    it 'should handle tv shows that havent ended' do
+      html = '''
+        <html>
+          <head>
+            <meta name="title" content="Lost (TV Series 2004– ) - IMDb">
+           </head>
+        </html>
+      '''
+      
+      YayImdbs.send(:get_title_and_year_from_meta, Nokogiri::HTML(html)).should == ["Lost", 2004]
+    end   
+
     it 'should handle videos' do
       html = '''
         <html>

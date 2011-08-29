@@ -223,7 +223,7 @@ class YayImdbs
         title_text = doc.at_css("meta[name='title']").try(:[], 'content')
         title_text = title_text.sub(/^IMDb - /, '')
         # Matches 'Movie Name (2010)' or 'Movie Name (2010/I)' or 'Lost (TV Series 2004–2010)'
-        if title_text && title_text =~ /(.*) \([^\)0-9]*(\d{4})((\/\w*)|(.\d{4}))?\)/
+        if title_text && title_text =~ /(.*) \([^\)0-9]*(\d{4})((\/\w*)|(.\d{4})|(.\s))?\)/
           movie_title = clean_title($1)
           movie_year = $2.to_i
         end
