@@ -221,6 +221,7 @@ class YayImdbs
 
       def get_title_and_year_from_meta(doc)
         title_text = doc.at_css("meta[name='title']").try(:[], 'content')
+        title_text = title_text.sub(/^IMDb - /, '')
         # Matches 'Movie Name (2010)' or 'Movie Name (2010/I)' or 'Lost (TV Series 2004–2010)'
         if title_text && title_text =~ /(.*) \([^\)0-9]*(\d{4})((\/\w*)|(.\d{4}))?\)/
           movie_title = clean_title($1)
