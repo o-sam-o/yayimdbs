@@ -295,12 +295,12 @@ describe YayImdbs do
       html = '''
         <html>
           <head>
-            <meta name="title" content="Lost (TV Series 2004– ) - IMDb">
+            <meta name="title" content="Man v. Food Nation (TV Series 2008&ndash;&nbsp;) - IMDb">
            </head>
         </html>
       '''
       
-      YayImdbs.send(:get_title_and_year_from_meta, Nokogiri::HTML(html)).should == ["Lost", 2004]
+      YayImdbs.send(:get_title_and_year_from_meta, Nokogiri::HTML(html)).should == ["Man v. Food Nation", 2008]
     end   
 
     it 'should handle videos' do
