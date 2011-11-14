@@ -64,7 +64,6 @@ describe YayImdbs do
         {:imdb_id=>"1393834", :name=>"Starsky & Hutch Documentary: The Word on the Street", :year=>1999, :video_type=>:tv_show}, 
         {:imdb_id=>"0464230", :name=>"TV Guide Specials: Starsky & Hutch", :year=>2004, :video_type=>:tv_show}, 
         {:imdb_id=>"1540121", :name=>"He's Starsky, I'm Hutch", :year=>2004, :video_type=>:tv_show}, 
-        {:imdb_id=>"0401745", :name=>"The Real Story of Butch Cassidy and the Sundance Kid", :year=>1993, :video_type=>:movie}, 
         {:imdb_id=>"0069819", :name=>"The Butcher, the Star and the Orphan", :year=>1975, :video_type=>:movie}, 
         {:imdb_id=>"0290216", :name=>"Hutch Stirs 'em Up", :year=>1923, :video_type=>:movie},
         {:imdb_id=>"0097788", :name=>"Love and Hate: The Story of Colin and Joanne Thatcher", :year=>1990, :video_type=>:tv_show},
@@ -152,16 +151,15 @@ describe YayImdbs do
       show_info[:year].should == 2004
       show_info[:video_type].should == :tv_show
       show_info[:plot].should == 'The survivors of a plane crash are forced to live with each other on a remote island, a dangerous new world that poses unique threats of its own.'
+
       # Tagline seems to change per scrap
-      begin
-        show_info[:tagline].should == "Don't Tell Them What They Can't Do"
-      rescue
-        begin
-          show_info[:tagline].should == "The truth will be revealed (Season 2)"
-        rescue
-          show_info[:tagline].should == "Us vs. Them (Season 3)"
-        end
-      end
+      [
+        "Don't Tell Them What They Can't Do", 
+        "The truth will be revealed (Season 2)", 
+        "Us vs. Them (Season 3)",
+        "Destiny Found (Season 6)"
+      ].should include show_info[:tagline]
+
       show_info[:language].first.should == 'English'
       show_info[:runtime].should == 42
       show_info[:genre].should == ['Adventure', 'Drama', 'Mystery', 'Sci-Fi', 'Thriller']

@@ -35,6 +35,7 @@ class YayImdbs
                      :language => :languages,
                      :motion_picture_rating_mpaa => :mpaa,
 					 :official_sites => :official_site}
+  OFFICAL_SITE_REGEX = /<a href="([^"]+)"[^>]*>Official site<\/a>/
 
   class << self
 
@@ -97,7 +98,7 @@ class YayImdbs
       info_hash[:video_type] = video_type_from_meta(doc)
       
       info_hash[:plot] = doc.xpath("//td[@id='overview-top']/p[2]").inner_text.strip
-      info_hash[:rating] = doc.at_css('.rating-rating').content.gsub(/\/.*/, '').to_f rescue nil
+      info_hash[:rating] = doc.at_css('.star-box-giga-star').inner_text.gsub(/[^0-9.]/, '').to_f rescue nil
 
       found_info_divs = false
       movie_properties(doc) do |key, value|
@@ -156,9 +157,9 @@ class YayImdbs
 
     # TODO capture all official sites, not all sites have an "Official site" link (e.g. Lost)
     def get_official_site_url(value, imdb_id)
-        value = value.match(/<a href="(.*?)">Official site<\/a>/)
+        value = value.match(OFFICAL_SITE_REGEX)
         if value.nil?
-            value = get_official_sites_page(imdb_id).inner_html.match(/<a href="(.*?)">Official site<\/a>/)
+            value = get_official_sites_page(imdb_id).inner_html.match(OFFICAL_SITE_REGEX)
         end
         return $1
     end
@@ -248,7 +249,7 @@ class YayImdbs
     
       def video_type_from_meta(doc)
         type_text = doc.at_css("meta[property='og:type']").try(:[], 'content')
-        type_text == 'tv_show' ? :tv_show : :movie
+        type_text =~ /tv_show/ ? :tv_show : :movie
       end
 
     end
