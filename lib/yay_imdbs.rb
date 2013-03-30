@@ -33,8 +33,7 @@ class YayImdbs
                      :year => :years, 
                      :season => :seasons,
                      :language => :languages,
-                     :motion_picture_rating_mpaa => :mpaa,
-					 :official_sites => :official_site}
+					           :official_sites => :official_site}
   OFFICAL_SITE_REGEX = /<a href="([^"]+)"[^>]*>Official site<\/a>/
 
   class << self
@@ -99,6 +98,9 @@ class YayImdbs
       
       info_hash[:plot] = doc.xpath("//td[@id='overview-top']/p[2]").inner_text.strip
       info_hash[:rating] = doc.at_css('.star-box-giga-star').inner_text.gsub(/[^0-9.]/, '').to_f rescue nil
+      # MPAA doesn't use the same style as its surrounding items.
+      # Surround items have h4 class=inline. Hopefully IMDB will fix this soon
+      info_hash[:mpaa] = doc.css("span[itemprop='contentRating']").last.text
 
       found_info_divs = false
       movie_properties(doc) do |key, value|
@@ -183,19 +185,19 @@ class YayImdbs
 
     def scrap_episodes(info_hash)
       episodes = []
-      doc = get_episodes_page(info_hash[:imdb_id])
 
-      doc.css(".filter-all").each do |e_div|
-        next unless e_div.at_css('h3').inner_text =~ /Season (\d+), Episode (\d+):/
-          episode = {"series" => $1.to_i, "episode" => $2.to_i, "title" => $'.strip}
+      info_hash[:seasons].each do |season_number|
+        doc = get_episodes_page(info_hash[:imdb_id], season_number)
+        season = doc.at_css('#episode_top').inner_text
+        episode_list = doc.at_css('.eplist')
+        episode_list.css('.info').each do |ep|
+          title = ep.at('a[@title]').text
+          episode_number = ep.at("meta[itemprop='episodeNumber']")['content']
+          episode_plot = ep.at_css('.item_description').text
+          episode_air_date = Date.parse(ep.at_css('.airdate').text) rescue nil
 
-        raw_date = e_div.at_css('strong').inner_text.strip
-        episode['date'] = Date.parse(raw_date) rescue nil
-
-        # Seems that the day can sometimes be ???? which doesnt play will with regex
-        episode['plot'] = $'.strip if e_div.inner_text =~ /#{raw_date}/ rescue nil
-
-        episodes << episode
+          episodes << {:series => season, :episode => episode_number, :title => title, :plot => episode_plot, :date => episode_air_date}
+        end
       end
       info_hash['episodes'] = episodes
     end
@@ -212,8 +214,12 @@ class YayImdbs
         Nokogiri::HTML(open(IMDB_MOVIE_URL + imdb_id + '/officialsites'	))
       end
 
-      def get_episodes_page(imdb_id)
-        Nokogiri::HTML(open(IMDB_MOVIE_URL + imdb_id + '/episodes'))
+      def get_episodes_page(imdb_id, season_number = nil)
+        if season_number
+          Nokogiri::HTML(open(IMDB_MOVIE_URL + imdb_id + "/episodes?season=#{season_number}"))
+        else
+          Nokogiri::HTML(open(IMDB_MOVIE_URL + imdb_id + '/episodes'))
+        end
       end
 
       def get_media_page(url_fragment)
@@ -243,7 +249,7 @@ class YayImdbs
       end  
     
       def video_type(td)
-        return :tv_show if td.content =~ /\((TV series|TV)\)/
+        return :tv_show if td.content =~ /\((TV Series|TV)\)/
         return :movie
       end 
     
