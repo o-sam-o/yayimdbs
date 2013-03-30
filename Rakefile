@@ -1,6 +1,10 @@
 require "rubygems"
-require "rake/gempackagetask"
-require "rake/rdoctask"
+
+#require "rake/gempackagetask"
+require "rubygems/package_task"
+
+#require "rake/rdoctask"
+require "rdoc/task"
 
 require "rspec"
 require "rspec/core/rake_task"
@@ -36,7 +40,7 @@ spec = Gem::Specification.new do |s|
 
 end
 
-Rake::GemPackageTask.new(spec) do |pkg|
+Gem::PackageTask.new(spec) do |pkg|
   pkg.gem_spec = spec
 
   # Generate the gemspec file for github.
@@ -44,7 +48,7 @@ Rake::GemPackageTask.new(spec) do |pkg|
   File.open(file, "w") {|f| f << spec.to_ruby }
 end
 
-Rake::RDocTask.new do |rd|
+RDoc::Task.new do |rd|
   rd.main = "README.md"
   rd.rdoc_files.include("README.md", "lib/**/*.rb")
   rd.rdoc_dir = "rdoc"
