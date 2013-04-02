@@ -109,7 +109,14 @@ describe YayImdbs do
       YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Avatar.2009.html'))
     
       YayImdbs.scrap_movie_info(imdb_id)['video_type'].should == :movie
-    end  
+    end
+
+    it 'should detect game type' do
+      imdb_id = '1517155'
+      YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('avatar_game.html'))
+
+      YayImdbs.scrap_movie_info(imdb_id)['video_type'].should == :game
+    end
 
   end
   

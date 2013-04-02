@@ -249,13 +249,27 @@ class YayImdbs
       end  
     
       def video_type(td)
-        return :tv_show if td.content =~ /\((TV Series|TV)\)/
-        return :movie
+        case td.content
+          when /\((TV Series|TV)\)/
+            :tv_show
+          when /\((Video Game|Game)\)/
+            :game
+          else
+            :movie
+        end
       end 
     
       def video_type_from_meta(doc)
         type_text = doc.at_css("meta[property='og:type']").try(:[], 'content')
-        type_text =~ /tv_show/ ? :tv_show : :movie
+
+        case type_text
+          when /tv_show/
+            :tv_show
+          when /game/
+            :game
+          else
+            :movie
+        end
       end
 
     end

@@ -2,13 +2,13 @@
 
 Gem::Specification.new do |s|
   s.name = "yayimdbs"
-  s.version = "0.2.7"
+  s.version = "0.2.8"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Sam Cavenagh"]
-  s.date = "2013-03-30"
+  s.authors = ["James Smith"]
+  s.date = "2013-03-31"
   s.description = "A simple imdb scraper built on Nokogiri for ruby 1.9+"
-  s.email = "cavenaghweb@hotmail.com"
+  s.email = "James@smithware.co.uk"
   s.extra_rdoc_files = ["README.md"]
   s.files = ["README.md", "spec", "lib/yay_imdbs.rb", "lib/yayimdbs.rb"]
   s.homepage = "http://github.com/o-sam-o/yayimdbs"
