@@ -21,8 +21,8 @@ spec = Gem::Specification.new do |s|
   s.version           = "0.2.8"
   s.summary           = "Yet Another Ying IMDB Scraper"
   s.description       = "A simple imdb scraper built on Nokogiri for ruby 1.9+"
-  s.author            = "James Smith"
-  s.email             = "James@smithware.co.uk"
+  s.author            = "Sam Cavenagh"
+  s.email             = "cavenaghweb@hotmail.com"
   s.homepage          = "http://github.com/o-sam-o/yayimdbs"
 
   s.has_rdoc          = true
