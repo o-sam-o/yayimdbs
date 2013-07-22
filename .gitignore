@@ -3,3 +3,6 @@ pkg/*
 coverage/*
 .*.swp
 .bundle/config
+.idea/*
+.rbenv-version
+*.gem

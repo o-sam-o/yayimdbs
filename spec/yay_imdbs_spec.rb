@@ -55,20 +55,24 @@ describe YayImdbs do
       movie_name = 'Starsky & Hutch'
       YayImdbs.should_receive(:get_search_page).with(movie_name).and_return(stubbed_page_result('starkey_hutch_search.html'))
       search_results = YayImdbs.search_imdb(movie_name)
-    
+
       search_results.should == [
-        {:imdb_id=>"0335438", :name=>"Starsky & Hutch", :year=>2004, :video_type=>:movie}, 
-        {:imdb_id=>"0072567", :name=>"Starsky and Hutch", :year=>1975, :video_type=>:tv_show}, 
-        {:imdb_id=>"1380813", :name=>"Starsky & Hutch", :year=>2003, :video_type=>:movie}, 
-        {:imdb_id=>"0488639", :name=>"Starsky & Hutch: A Last Look", :year=>2004, :video_type=>:movie}, 
-        {:imdb_id=>"1393834", :name=>"Starsky & Hutch Documentary: The Word on the Street", :year=>1999, :video_type=>:tv_show}, 
-        {:imdb_id=>"0464230", :name=>"TV Guide Specials: Starsky & Hutch", :year=>2004, :video_type=>:tv_show}, 
-        {:imdb_id=>"1540121", :name=>"He's Starsky, I'm Hutch", :year=>2004, :video_type=>:tv_show}, 
-        {:imdb_id=>"0069819", :name=>"The Butcher, the Star and the Orphan", :year=>1975, :video_type=>:movie}, 
-        {:imdb_id=>"0290216", :name=>"Hutch Stirs 'em Up", :year=>1923, :video_type=>:movie},
-        {:imdb_id=>"0097788", :name=>"Love and Hate: The Story of Colin and Joanne Thatcher", :year=>1990, :video_type=>:tv_show},
-        {:imdb_id=>"1652293", :name=>"Holy Rollin': The True Life Story of Poplar Creek Church of God, Jesus, and the Holy Ghost", :year=>2006, :video_type=>:movie}]
-   end  
+          {:imdb_id=>"0335438", :name=>"Starsky & Hutch", :year=>2004, :video_type=>:movie},
+          {:imdb_id=>"0072567", :name=>"Starsky and Hutch", :year=>1975, :video_type=>:tv_show},
+          {:imdb_id=>"1380813", :name=>"Starsky & Hutch", :year=>2003, :video_type=>:movie},
+          {:imdb_id=>"0488639", :name=>"Starsky & Hutch: A Last Look", :year=>2004, :video_type=>:movie},
+          {:imdb_id=>"0464230", :name=>"TV Guide Specials: Starsky & Hutch", :year=>2004, :video_type=>:movie},
+          {:imdb_id=>"1393834", :name=>"Starsky & Hutch Documentary: The Word on the Street", :year=>1999, :video_type=>:movie},
+          {:imdb_id=>"0594911", :name=>"Starsky & Hutch", :year=>2004, :video_type=>:tv_show},
+          {:imdb_id=>"0318220", :name=>"HBO First Look", :year=>2004, :video_type=>:tv_show},
+          {:imdb_id=>"0709541", :name=>"Starsky and Hutch Are Guilty", :year=>1977, :video_type=>:tv_show},
+          {:imdb_id=>"0072567", :name=>"Starsky and Hutch", :year=>1977, :video_type=>:tv_show},
+          {:imdb_id=>"0709542", :name=>"Starsky and Hutch on Playboy Island", :year=>1977, :video_type=>:tv_show},
+          {:imdb_id=>"0072567", :name=>"Starsky and Hutch", :year=>1977, :video_type=>:tv_show},
+          {:imdb_id=>"1292747", :name=>"'Starsky & Hutch', 'The Sopranos' and More", :year=>2004, :video_type=>:tv_show},
+          {:imdb_id=>"0405520", :name=>"Best Week Ever", :year=>2004, :video_type=>:tv_show}
+      ]
+    end
 
     it 'should search imdb and return name, year and id even for exact search result' do
       movie_name = 'Avatar'
@@ -105,7 +109,14 @@ describe YayImdbs do
       YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Avatar.2009.html'))
     
       YayImdbs.scrap_movie_info(imdb_id)['video_type'].should == :movie
-    end  
+    end
+
+    it 'should detect game type' do
+      imdb_id = '1517155'
+      YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('avatar_game.html'))
+
+      YayImdbs.scrap_movie_info(imdb_id)['video_type'].should == :game
+    end
 
   end
   
@@ -124,8 +135,8 @@ describe YayImdbs do
       movie_info[:title].should == 'Avatar'
       movie_info[:year].should == 2009
       movie_info[:video_type].should == :movie
-      movie_info[:release_date].should == Date.new(y=2009,m=12,d=17)
-      movie_info[:plot].should == 'A paraplegic marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.'
+      movie_info[:release_date].should == Date.new(y=2009,m=12,d=18)
+      movie_info[:plot].should == 'A paraplegic Marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.'
       movie_info[:director].should == 'James Cameron'
       # Scraped value seems to alternate
       begin
@@ -162,7 +173,7 @@ describe YayImdbs do
 
       show_info[:language].first.should == 'English'
       show_info[:runtime].should == 42
-      show_info[:genre].should == ['Adventure', 'Drama', 'Mystery', 'Sci-Fi', 'Thriller']
+      show_info[:genre].should == ["Adventure", "Drama", "Fantasy", "Mystery", "Sci-Fi", "Thriller"]
       
       show_info[:episodes].should_not be_nil
       show_info[:episodes].should_not be_empty
@@ -222,7 +233,7 @@ describe YayImdbs do
         YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Avatar.2009.html'))
         movie_info = YayImdbs.scrap_movie_info(imdb_id)
 
-        movie_info[:rating].should == 8.1
+        movie_info[:rating].should == 8.0
       end
 
       it 'for lost' do
@@ -231,7 +242,7 @@ describe YayImdbs do
         YayImdbs.should_receive(:get_episodes_page).with(imdb_id).and_return(stubbed_page_result('Lost.2004.Episodes.html'))
         show_info = YayImdbs.scrap_movie_info(imdb_id)
 
-        show_info[:rating].should == 8.5
+        show_info[:rating].should == 8.3
       end
     end
 

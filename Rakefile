@@ -1,6 +1,10 @@
 require "rubygems"
-require "rake/gempackagetask"
-require "rake/rdoctask"
+
+#require "rake/gempackagetask"
+require "rubygems/package_task"
+
+#require "rake/rdoctask"
+require "rdoc/task"
 
 require "rspec"
 require "rspec/core/rake_task"
@@ -14,7 +18,7 @@ task :default => ["spec"]
 spec = Gem::Specification.new do |s|
 
   s.name              = "yayimdbs"
-  s.version           = "0.2.7"
+  s.version           = "0.2.8"
   s.summary           = "Yet Another Ying IMDB Scraper"
   s.description       = "A simple imdb scraper built on Nokogiri for ruby 1.9+"
   s.author            = "Sam Cavenagh"
@@ -36,7 +40,7 @@ spec = Gem::Specification.new do |s|
 
 end
 
-Rake::GemPackageTask.new(spec) do |pkg|
+Gem::PackageTask.new(spec) do |pkg|
   pkg.gem_spec = spec
 
   # Generate the gemspec file for github.
@@ -44,7 +48,7 @@ Rake::GemPackageTask.new(spec) do |pkg|
   File.open(file, "w") {|f| f << spec.to_ruby }
 end
 
-Rake::RDocTask.new do |rd|
+RDoc::Task.new do |rd|
   rd.main = "README.md"
   rd.rdoc_files.include("README.md", "lib/**/*.rb")
   rd.rdoc_dir = "rdoc"
@@ -64,6 +68,7 @@ task :download_spec_html do
   page_into_file('http://www.imdb.com/find?s=all&q=Starsky+%26+Hutch', 'spec/starkey_hutch_search.html')
   page_into_file('http://www.imdb.com/media/rm815832320/tt0093437', 'spec/media_page.html')
   page_into_file('http://www.imdb.com/title/tt0499549/officialsites', 'spec/avatar_officialsites.html')
+  page_into_file('http://www.imdb.com/title/tt1517155/', 'spec/avatar_game.html')
 end
 
 def page_into_file(request_url, file_name)
