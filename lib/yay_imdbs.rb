@@ -11,7 +11,7 @@ rescue
   require 'active_support/all'
 end
 
-class YayImdbs 
+class YayImdbs
   IMDB_BASE_URL = 'http://www.imdb.com/'
   IMDB_SEARCH_URL = IMDB_BASE_URL + 'find?s=tt&q='
   IMDB_MOVIE_URL = IMDB_BASE_URL + 'title/tt'
@@ -28,9 +28,9 @@ class YayImdbs
   DATE_PROPERTIES = [:release_date]
   LIST_PROPERTIES = [:genres, :plot_keywords, :country, :sound_mix, :language]
   INT_LIST_PROPERTIES = [:year, :season]
-  PROPERTY_ALIAS  = {:genres => :genre, 
-                     :taglines => :tagline, 
-                     :year => :years, 
+  PROPERTY_ALIAS  = {:genres => :genre,
+                     :taglines => :tagline,
+                     :year => :years,
                      :season => :seasons,
                      :language => :languages,
 					           :official_sites => :official_site}
@@ -53,7 +53,7 @@ class YayImdbs
 
     def search_imdb(search_term)
       search_results = []
-    
+
       doc = get_search_page(search_term)
 
       # If the search is an exact match imdb will redirect to the movie page not search results page
@@ -67,8 +67,8 @@ class YayImdbs
           raise "Unable to extract imdb id from exact search result"
         end
       end
-    
-      doc.css("td").each do |td| 
+
+      doc.css("td").each do |td|
         td.css("a").each do |link|
           href = link['href']
           current_name = link.content
@@ -80,13 +80,13 @@ class YayImdbs
           search_results << {:imdb_id => imdb_id, :name => clean_title(current_name), :year => current_year, :video_type => video_type(td)}
         end
       end
-    
+
       return search_results
-    end  
+    end
 
     def scrap_movie_info(imdb_id)
       info_hash = {:imdb_id => imdb_id}.with_indifferent_access
-    
+
       doc = get_movie_page(imdb_id)
       title, year = get_title_and_year_from_meta(doc)
       info_hash[:title], info_hash[:year] = title, year
@@ -95,7 +95,7 @@ class YayImdbs
         raise "Unable to find title or year for imdb id #{imdb_id}"
       end
       info_hash[:video_type] = video_type_from_meta(doc)
-      
+
       info_hash[:plot] = doc.xpath("//td[@id='overview-top']/p[2]").inner_text.strip
       info_hash[:rating] = doc.at_css('.star-box-giga-star').inner_text.gsub(/[^0-9.]/, '').to_f rescue nil
       # MPAA doesn't use the same style as its surrounding items.
@@ -178,7 +178,7 @@ class YayImdbs
       #Try to scrap a larger version of the image url
       large_img_page_link = doc.at_css("td[id=img_primary] a").try(:[], 'href')
       return unless large_img_page_link
-      large_img_doc = get_media_page(large_img_page_link) 
+      large_img_doc = get_media_page(large_img_page_link)
       large_img_url = large_img_doc.at_css("img[id=primary-img]").try(:[], 'src')
       info_hash['large_image'] = large_img_url
     end
@@ -209,7 +209,7 @@ class YayImdbs
       def get_movie_page(imdb_id)
         Nokogiri::HTML(open(IMDB_MOVIE_URL + imdb_id))
       end
-	  
+
       def get_official_sites_page(imdb_id)
         Nokogiri::HTML(open(IMDB_MOVIE_URL + imdb_id + '/officialsites'	))
       end
@@ -235,19 +235,19 @@ class YayImdbs
           movie_year = $2.to_i
         end
         return movie_title, movie_year
-      end  
+      end
 
       # Remove surrounding double quotes that seems to appear on tv show name
       def clean_title(movie_title)
         movie_title = $1 if movie_title =~ /^"(.*)"$/
         return movie_title.strip
-      end  
-    
+      end
+
       # Hackyness to get around ruby 1.9 encoding issue
       def strip_whitespace(s)
         s.encode('UTF-8').gsub(STRIP_WHITESPACE, '').strip
-      end  
-    
+      end
+
       def video_type(td)
         case td.content
           when /\((TV Series|TV)\)/
@@ -257,8 +257,8 @@ class YayImdbs
           else
             :movie
         end
-      end 
-    
+      end
+
       def video_type_from_meta(doc)
         type_text = doc.at_css("meta[property='og:type']").try(:[], 'content')
 
