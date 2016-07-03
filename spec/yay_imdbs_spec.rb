@@ -127,7 +127,7 @@ describe YayImdbs do
       YayImdbs.stub(:get_official_sites_page).and_return(stubbed_page_result('avatar_officialsites.html'))
      end
 
-    it 'should retrive the metadata for a movie' do
+    it 'should retrieve the metadata for a movie' do
       imdb_id = '0499549'
       YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Avatar.2009.html'))
       movie_info = YayImdbs.scrap_movie_info(imdb_id)
@@ -195,7 +195,7 @@ describe YayImdbs do
       series_2_ep_5[:date].should == Date.new(y=2005,m=10,d=19)
     end
 
-    it 'should retrive the poster urls' do
+    it 'should retrieve the poster urls' do
       imdb_id = '0499549'
       YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Avatar.2009.html'))
       movie_info = YayImdbs.scrap_movie_info(imdb_id)
