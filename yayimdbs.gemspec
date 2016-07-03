@@ -26,17 +26,17 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency "nokogiri", "~> 1.4", ">= 1.4.2"
       s.add_runtime_dependency "activesupport", "~> 3.0", ">= 3.0.10"
       s.add_runtime_dependency "i18n", ">= 0.6.0", "< 0.7" # 0.7 requires Ruby 1.9.3
-      s.add_development_dependency(%q<rspec>, [">= 2.0.0"])
+      s.add_development_dependency "rspec", "~> 2.0", ">= 2.0.0"
     else
       s.add_runtime_dependency "nokogiri", "~> 1.4", ">= 1.4.2"
       s.add_runtime_dependency "activesupport", "~> 3.0", ">= 3.0.10"
       s.add_runtime_dependency "i18n", ">= 0.6.0", "< 0.7" # 0.7 requires Ruby 1.9.3
-      s.add_dependency(%q<rspec>, [">= 2.0.0"])
+      s.add_development_dependency "rspec", "~> 2.0", ">= 2.0.0"
     end
   else
     s.add_runtime_dependency "nokogiri", "~> 1.4", ">= 1.4.2"
     s.add_runtime_dependency "activesupport", "~> 3.0", ">= 3.0.10"
     s.add_runtime_dependency "i18n", ">= 0.6.0", "< 0.7" # 0.7 requires Ruby 1.9.3
-    s.add_dependency(%q<rspec>, [">= 2.0.0"])
+    s.add_development_dependency "rspec", "~> 2.0", ">= 2.0.0"
   end
 end

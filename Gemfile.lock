@@ -32,7 +32,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  rspec (>= 2.0.0)
+  rspec (~> 2.0, >= 2.0.0)
   yayimdbs!
 
 BUNDLED WITH
