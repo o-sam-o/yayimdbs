@@ -1,5 +1,5 @@
 # encoding: UTF-8
-require 'rspec'
+require 'spec_helper'
 require File.dirname(__FILE__) + '/../lib/yayimdbs'
 describe YayImdbs do
 
