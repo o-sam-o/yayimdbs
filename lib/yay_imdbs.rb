@@ -192,7 +192,7 @@ class YayImdbs
         episode_list = doc.at_css('.eplist')
         episode_list.css('.info').each do |ep|
           title = ep.at('a[@title]').text
-          episode_number = ep.at("meta[itemprop='episodeNumber']")['content']
+          episode_number = ep.at("meta[itemprop='episodeNumber']")['content'].to_i
           episode_plot = ep.at_css('.item_description').text
           episode_air_date = Date.parse(ep.at_css('.airdate').text) rescue nil
 
