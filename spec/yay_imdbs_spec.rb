@@ -155,7 +155,8 @@ describe YayImdbs do
     it 'should retrieve metadata for a tv show' do
       imdb_id = '0411008'
       YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Lost.2004.html'))
-      YayImdbs.should_receive(:get_episodes_page).with(imdb_id, anything).exactly(6).times.and_return(stubbed_page_result('Lost.2004.Episodes.html'))
+      number_of_seasons = 6
+      YayImdbs.should_receive(:get_episodes_page).with(imdb_id, anything).exactly(number_of_seasons).times.and_return(stubbed_page_result('Lost.2004.Episodes.html'))
       show_info = YayImdbs.scrap_movie_info(imdb_id)
 
       show_info[:title].should == 'Lost'
@@ -177,7 +178,8 @@ describe YayImdbs do
 
       show_info[:episodes].should_not be_nil
       show_info[:episodes].should_not be_empty
-      show_info[:episodes].length.should == 115
+      number_of_episodes_on_stub_page = 17 # count the itemprop="episodes" tags on Lost.2004.Episodes.html
+      show_info[:episodes].length.should == number_of_seasons * number_of_episodes_on_stub_page
 
       series_2_ep_5 = nil
       show_info[:episodes].each do |episode|
