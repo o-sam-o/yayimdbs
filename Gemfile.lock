@@ -3,7 +3,7 @@ PATH
   specs:
     yayimdbs (0.2.8)
       activesupport (~> 3.0, >= 3.0.10)
-      i18n (>= 0.6.0, < 0.7)
+      i18n (~> 0.6, >= 0.6.0)
       nokogiri (~> 1.4, >= 1.4.2)
 
 GEM
@@ -15,7 +15,7 @@ GEM
     byebug (9.0.5)
     coderay (1.1.1)
     diff-lcs (1.2.5)
-    i18n (0.6.11)
+    i18n (0.7.0)
     method_source (0.8.2)
     mini_portile2 (2.1.0)
     multi_json (1.12.1)

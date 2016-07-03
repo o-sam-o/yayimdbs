@@ -25,14 +25,14 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency "nokogiri", "~> 1.4", ">= 1.4.2"
       s.add_runtime_dependency "activesupport", "~> 3.0", ">= 3.0.10"
-      s.add_runtime_dependency "i18n", ">= 0.6.0", "< 0.7" # 0.7 requires Ruby 1.9.3
+      s.add_runtime_dependency "i18n", "~> 0.6", ">= 0.6.0"
       s.add_development_dependency "rspec", "~> 2.7", ">= 2.7.0"
       s.add_development_dependency 'pry', "~> 0.10.3", ">= 0.10.3"
       s.add_development_dependency 'byebug', "~>9.0.5", ">= 9.0.5"
     else
       s.add_runtime_dependency "nokogiri", "~> 1.4", ">= 1.4.2"
       s.add_runtime_dependency "activesupport", "~> 3.0", ">= 3.0.10"
-      s.add_runtime_dependency "i18n", ">= 0.6.0", "< 0.7" # 0.7 requires Ruby 1.9.3
+      s.add_runtime_dependency "i18n", "~> 0.6", ">= 0.6.0"
       s.add_development_dependency "rspec", "~> 2.7", ">= 2.7.0"
       s.add_development_dependency 'pry', "~> 0.10.3", ">= 0.10.3"
       s.add_development_dependency 'byebug', "~>9.0.5", ">= 9.0.5"
@@ -40,7 +40,7 @@ Gem::Specification.new do |s|
   else
     s.add_runtime_dependency "nokogiri", "~> 1.4", ">= 1.4.2"
     s.add_runtime_dependency "activesupport", "~> 3.0", ">= 3.0.10"
-    s.add_runtime_dependency "i18n", ">= 0.6.0", "< 0.7" # 0.7 requires Ruby 1.9.3
+    s.add_runtime_dependency "i18n", "~> 0.6", ">= 0.6.0"
     s.add_development_dependency "rspec", "~> 2.7", ">= 2.7.0"
     s.add_development_dependency 'pry', "~> 0.10.3", ">= 0.10.3"
     s.add_development_dependency 'byebug', "~>9.0.5", ">= 9.0.5"
