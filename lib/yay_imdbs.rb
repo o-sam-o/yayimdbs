@@ -196,7 +196,7 @@ class YayImdbs
           episode_plot = ep.at_css('.item_description').text
           episode_air_date = Date.parse(ep.at_css('.airdate').text) rescue nil
 
-          episodes << {:imdb_id=> info_hash[:imdb_id], :series => season, :episode => episode_number, :title => title, :plot => episode_plot, :date => episode_air_date}
+          episodes << {:imdb_id=> info_hash[:imdb_id], :series => season_number, :episode => episode_number, :title => title, :plot => episode_plot, :date => episode_air_date}
         end
       end
       info_hash['episodes'] = episodes
