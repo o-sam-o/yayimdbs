@@ -56,7 +56,7 @@ describe YayImdbs do
       YayImdbs.should_receive(:get_search_page).with(movie_name).and_return(stubbed_page_result('starkey_hutch_search.html'))
       search_results = YayImdbs.search_imdb(movie_name)
 
-      search_results.should == [
+      search_results.should =~ [
           {:imdb_id=>"0335438", :name=>"Starsky & Hutch", :year=>2004, :video_type=>:movie},
           {:imdb_id=>"0072567", :name=>"Starsky and Hutch", :year=>1975, :video_type=>:tv_show},
           {:imdb_id=>"1380813", :name=>"Starsky & Hutch", :year=>2003, :video_type=>:movie},
