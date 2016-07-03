@@ -15,37 +15,40 @@ end
 
 task :default => ["spec"]
 
-spec = Gem::Specification.new do |s|
+desc 'create gemspec file'
+task :gemspec do
+  gemspec = Gem::Specification.new do |s|
 
-  s.name              = "yayimdbs"
-  s.version           = "0.2.8"
-  s.summary           = "Yet Another Ying IMDB Scraper"
-  s.description       = "A simple imdb scraper built on Nokogiri for ruby 1.9+"
-  s.author            = "Sam Cavenagh"
-  s.email             = "cavenaghweb@hotmail.com"
-  s.homepage          = "http://github.com/o-sam-o/yayimdbs"
+    s.name              = "yayimdbs"
+    s.version           = "0.2.8"
+    s.summary           = "Yet Another Ying IMDB Scraper"
+    s.description       = "A simple imdb scraper built on Nokogiri for ruby 1.9+"
+    s.author            = "Sam Cavenagh"
+    s.email             = "cavenaghweb@hotmail.com"
+    s.homepage          = "http://github.com/o-sam-o/yayimdbs"
 
-  s.has_rdoc          = true
-  s.extra_rdoc_files  = %w(README.md)
-  s.rdoc_options      = %w(--main README.md)
+    s.has_rdoc          = true
+    s.extra_rdoc_files  = %w(README.md)
+    s.rdoc_options      = %w(--main README.md)
 
-  s.files             = %w(README.md) + Dir.glob("{spec,lib/**/*}")
-  s.require_paths     = ["lib"]
+    s.files             = %w(README.md) + Dir.glob("{spec,lib/**/*}")
+    s.require_paths     = ["lib"]
 
-  s.add_dependency("nokogiri", ">= 1.4.2")
-  s.add_dependency("activesupport")
-  s.add_dependency("i18n")
-  
-  s.add_development_dependency("rspec", ">= 2.0.0")
+    s.add_runtime_dependency("nokogiri", "~> 1.4", ">= 1.4.2")
+    s.add_runtime_dependency("activesupport")
+    s.add_runtime_dependency("i18n")
 
-end
+    s.add_development_dependency("rspec", ">= 2.0.0")
 
-Gem::PackageTask.new(spec) do |pkg|
-  pkg.gem_spec = spec
+  end
 
-  # Generate the gemspec file for github.
-  file = File.dirname(__FILE__) + "/#{spec.name}.gemspec"
-  File.open(file, "w") {|f| f << spec.to_ruby }
+  Gem::PackageTask.new(gemspec) do |pkg|
+    pkg.gem_spec = gemspec
+
+    # Generate the gemspec file for github.
+    file = File.dirname(__FILE__) + "/#{gemspec.name}.gemspec"
+    File.open(file, "w") {|f| f << gemspec.to_ruby }
+  end
 end
 
 RDoc::Task.new do |rd|
@@ -56,7 +59,7 @@ end
 
 desc 'Clear out RDoc and generated packages'
 task :clean => [:clobber_rdoc, :clobber_package] do
-  rm "#{spec.name}.gemspec"
+  rm "#{gemspec.name}.gemspec"
 end
 
 
