@@ -4,7 +4,7 @@ PATH
     yayimdbs (0.2.8)
       activesupport
       i18n (>= 0.6.0, < 0.7)
-      nokogiri (>= 1.4.2)
+      nokogiri (~> 1.4, >= 1.4.2)
 
 GEM
   remote: http://rubygems.org/
