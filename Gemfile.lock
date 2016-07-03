@@ -1,3 +1,11 @@
+PATH
+  remote: .
+  specs:
+    yayimdbs (0.2.8)
+      activesupport
+      i18n
+      nokogiri (>= 1.4.2)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -20,7 +28,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activesupport
-  i18n
-  nokogiri (>= 1.4.2)
-  rspec (~> 2.0.0)
+  rspec (>= 2.0.0)
+  yayimdbs!
+
+BUNDLED WITH
+   1.12.5
