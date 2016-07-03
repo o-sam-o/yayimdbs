@@ -99,7 +99,7 @@ describe YayImdbs do
     it 'should detect tv show type' do
       imdb_id = '0411008'
       YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Lost.2004.html'))
-      YayImdbs.should_receive(:get_episodes_page).with(imdb_id).and_return(stubbed_page_result('Lost.2004.Episodes.html'))
+      YayImdbs.should_receive(:get_episodes_page).with(imdb_id, anything).exactly(6).times.and_return(stubbed_page_result('Lost.2004.Episodes.html'))
 
       YayImdbs.scrap_movie_info(imdb_id)['video_type'].should == :tv_show
     end
@@ -155,7 +155,7 @@ describe YayImdbs do
     it 'should retrieve metadata for a tv show' do
       imdb_id = '0411008'
       YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Lost.2004.html'))
-      YayImdbs.should_receive(:get_episodes_page).with(imdb_id).and_return(stubbed_page_result('Lost.2004.Episodes.html'))
+      YayImdbs.should_receive(:get_episodes_page).with(imdb_id, anything).exactly(6).times.and_return(stubbed_page_result('Lost.2004.Episodes.html'))
       show_info = YayImdbs.scrap_movie_info(imdb_id)
 
       show_info[:title].should == 'Lost'
@@ -239,7 +239,7 @@ describe YayImdbs do
       it 'for lost' do
         imdb_id = '0411008'
         YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Lost.2004.html'))
-        YayImdbs.should_receive(:get_episodes_page).with(imdb_id).and_return(stubbed_page_result('Lost.2004.Episodes.html'))
+        YayImdbs.should_receive(:get_episodes_page).with(imdb_id, anything).exactly(6).times.and_return(stubbed_page_result('Lost.2004.Episodes.html'))
         show_info = YayImdbs.scrap_movie_info(imdb_id)
 
         show_info[:rating].should == 8.3
