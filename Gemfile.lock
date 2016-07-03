@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     yayimdbs (0.2.8)
-      activesupport
+      activesupport (~> 3.0, >= 3.0.10)
       i18n (>= 0.6.0, < 0.7)
       nokogiri (~> 1.4, >= 1.4.2)
 
