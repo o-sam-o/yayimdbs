@@ -191,7 +191,7 @@ describe YayImdbs do
       end
 
       series_2_ep_5[:title].should == '...And Found'
-      series_2_ep_5[:plot].should == %q{A desperate and growingly insane Michael sets off into the jungle by himself determined to find Walt, but discovers that he is not alone. Meanwhile, Sawyer and Jin are ordered by their captors, the tail crash survivors, to take them to their camp. But they are delayed when Jin and the hulking Mr. Eko are forced to go into the jungle to look for Michael before the dreaded "others" find him first. Back at the beach camp, Sun frantically searches for her missing wedding ring which triggers flashbacks to Sun and Jin's past showing how they met for the first time in early 1990s Seoul, when Jin was working as a doorman of a fancy hotel where Sun was staying at for a courtship engagement set up by her mother.}
+      series_2_ep_5[:plot].strip.should == %q{Michael goes into the jungle to find Walt, but discovers he's not alone. Sawyer and Jin's captors demand to be taken to their camp.}
       series_2_ep_5[:date].should == Date.new(y=2005,m=10,d=19)
     end
 
