@@ -68,6 +68,9 @@ task :download_spec_html do
   page_into_file('http://www.imdb.com/title/tt0499549/', 'spec/Avatar.2009.html')
   page_into_file('http://www.imdb.com/title/tt0411008/', 'spec/Lost.2004.html')
   page_into_file('http://www.imdb.com/title/tt0411008/episodes', 'spec/Lost.2004.Episodes.html')
+  (1..6).to_a.each do |season|
+    page_into_file("http://www.imdb.com/title/tt0411008/episodes?season=#{season}", "spec/Lost.2004.Episodes.Season.#{season}.html")
+  end
   page_into_file('http://www.imdb.com/find?s=all&q=Starsky+%26+Hutch', 'spec/starkey_hutch_search.html')
   page_into_file('http://www.imdb.com/media/rm815832320/tt0093437', 'spec/media_page.html')
   page_into_file('http://www.imdb.com/title/tt0499549/officialsites', 'spec/avatar_officialsites.html')
@@ -77,9 +80,20 @@ end
 def page_into_file(request_url, file_name)
   require 'net/http'
 
-  file = File.new(file_name, "w")
-  file.write(Net::HTTP.get(URI.parse(request_url)))
-  file.close
+  uri = URI.parse(request_url)
+  req = Net::HTTP::Get.new(uri)
+  # avoid localized results when calling this from non-US countries:
+  req['Accept-Language'] = 'en-US,en;q=0.5'
+
+  res = Net::HTTP.start(uri.hostname, uri.port) do |http|
+    http.request(req)
+  end
+
+  if res.is_a?(Net::HTTPSuccess)
+    file = File.new(file_name, "w")
+    file.write(res.body)
+    file.close
+  end
 
   p "Refreshed #{file_name}"
 end
