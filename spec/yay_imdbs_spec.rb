@@ -136,7 +136,7 @@ describe YayImdbs do
       movie_info[:year].should == 2009
       movie_info[:video_type].should == :movie
       movie_info[:release_date].should == Date.new(y=2009,m=12,d=18)
-      movie_info[:plot].should == 'A paraplegic Marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.'
+      movie_info[:plot].should == 'A paraplegic marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.'
       movie_info[:director].should == 'James Cameron'
       # Scraped value seems to alternate
       begin
@@ -165,7 +165,7 @@ describe YayImdbs do
       show_info[:seasons].should =~ [6, 5, 4, 3, 2, 1]
       show_info[:year].should == 2004
       show_info[:video_type].should == :tv_show
-      show_info[:plot].should == 'The survivors of a plane crash are forced to live with each other on a remote island, a dangerous new world that poses unique threats of its own.'
+      show_info[:plot].should == 'The survivors of a plane crash are forced to work together in order to survive on a seemingly deserted tropical island.'
 
       # Tagline seems to change per scrap
       [

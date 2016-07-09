@@ -96,7 +96,7 @@ class YayImdbs
       end
       info_hash[:video_type] = video_type_from_meta(doc)
 
-      info_hash[:plot] = doc.xpath("//td[@id='overview-top']/p[2]").inner_text.strip
+      info_hash[:plot] = get_property_plot(doc)
       info_hash[:rating] = doc.at_css('.star-box-giga-star').inner_text.gsub(/[^0-9.]/, '').to_f rescue nil
       # MPAA doesn't use the same style as its surrounding items.
       # Surround items have h4 class=inline. Hopefully IMDB will fix this soon
@@ -162,6 +162,10 @@ class YayImdbs
           yield symbol_key, value
         end
       end
+    end
+
+    def get_property_plot(doc)
+      doc.css('.plot_summary .summary_text').inner_text.strip
     end
 
     def get_property_seasons(doc)
