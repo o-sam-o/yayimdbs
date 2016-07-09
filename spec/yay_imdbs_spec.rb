@@ -176,7 +176,7 @@ describe YayImdbs do
       ].should include show_info[:tagline]
 
       show_info[:language].first.should == 'English'
-      show_info[:runtime].should == 42
+      show_info[:runtime].should == 44
       show_info[:genre].should == ["Adventure", "Drama", "Fantasy", "Mystery", "Sci-Fi", "Thriller"]
 
       show_info[:episodes].should_not be_nil
