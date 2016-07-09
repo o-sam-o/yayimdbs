@@ -31,7 +31,7 @@ class YayImdbs
   PROPERTY_ALIAS  = {:genres => :genre,
                      :taglines => :tagline,
                      :year => :years,
-                     :season => :seasons,
+                     :seasons => :season,
                      :language => :languages,
 					           :official_sites => :official_site}
   OFFICAL_SITE_REGEX = /<a href="([^"]+)"[^>]*>Official site<\/a>/
@@ -148,13 +148,26 @@ class YayImdbs
     def movie_properties(doc)
       doc.css("div h4").each do |h4|
         div = h4.parent
+
         raw_key = h4.inner_text
         key = raw_key.sub(':', '').strip.downcase
-        value = div.inner_text[((div.inner_text =~ /#{Regexp.escape(raw_key)}/) + raw_key.length).. -1]
-        value = value.gsub(/\302\240\302\273/u, '').strip.gsub(/(#{MORE_INFO_LINKS.join(')|(')})$/i, '').strip
         symbol_key = key.downcase.gsub(/[^a-zA-Z0-9 ]/, '').gsub(/\s/, '_').to_sym
-        yield symbol_key, value
+
+        if self.methods.include?("get_property_#{symbol_key}".to_sym)
+          yield symbol_key, self.send("get_property_#{symbol_key}".to_sym, doc)
+        else
+          value = div.inner_text[((div.inner_text =~ /#{Regexp.escape(raw_key)}/) + raw_key.length).. -1]
+          value = value.gsub(/\302\240\302\273/u, '').strip.gsub(/(#{MORE_INFO_LINKS.join(')|(')})$/i, '').strip
+          # puts "#{"%-25s" % Regexp.escape(raw_key).inspect}#{"%-20s" % symbol_key.inspect}#{"%-25s" % value[0..20].inspect}"
+          yield symbol_key, value
+        end
       end
+    end
+
+    def get_property_seasons(doc)
+      raw_seasons_and_years = doc.css("div.seasons-and-year-nav a")
+      seasons = raw_seasons_and_years.map { |el| el.attributes["href"].value.sub!(/.*episodes\?season=([0-9]+).*/,'\1') }.compact
+      seasons.map(&:to_i)
     end
 
     # TODO capture all official sites, not all sites have an "Official site" link (e.g. Lost)
