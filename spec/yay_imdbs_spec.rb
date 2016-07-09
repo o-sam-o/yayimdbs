@@ -237,7 +237,7 @@ describe YayImdbs do
         YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Avatar.2009.html'))
         movie_info = YayImdbs.scrap_movie_info(imdb_id)
 
-        movie_info[:rating].should == 8.0
+        movie_info[:rating].should == 7.9
       end
 
       it 'for lost' do
@@ -246,7 +246,7 @@ describe YayImdbs do
         YayImdbs.should_receive(:get_episodes_page).with(imdb_id, anything).exactly(6).times.and_return(stubbed_page_result('Lost.2004.Episodes.html'))
         show_info = YayImdbs.scrap_movie_info(imdb_id)
 
-        show_info[:rating].should == 8.3
+        show_info[:rating].should == 8.4
       end
     end
 
