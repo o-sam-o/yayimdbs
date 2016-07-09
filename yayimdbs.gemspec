@@ -1,9 +1,9 @@
 # -*- encoding: utf-8 -*-
-# stub: yayimdbs 0.2.8 ruby lib
+# stub: yayimdbs 0.2.9 ruby lib
 
 Gem::Specification.new do |s|
   s.name = "yayimdbs"
-  s.version = "0.2.8"
+  s.version = "0.2.9"
   s.license = "MIT"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
