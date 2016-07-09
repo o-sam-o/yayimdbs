@@ -57,20 +57,21 @@ describe YayImdbs do
       search_results = YayImdbs.search_imdb(movie_name)
 
       search_results.should =~ [
-          {:imdb_id=>"0335438", :name=>"Starsky & Hutch", :year=>2004, :video_type=>:movie},
-          {:imdb_id=>"0072567", :name=>"Starsky and Hutch", :year=>1975, :video_type=>:tv_show},
-          {:imdb_id=>"1380813", :name=>"Starsky & Hutch", :year=>2003, :video_type=>:game},
-          {:imdb_id=>"0488639", :name=>"Starsky & Hutch: A Last Look", :year=>2004, :video_type=>:movie},
-          {:imdb_id=>"0464230", :name=>"TV Guide Specials: Starsky & Hutch", :year=>2004, :video_type=>:movie},
-          {:imdb_id=>"1393834", :name=>"Starsky & Hutch Documentary: The Word on the Street", :year=>1999, :video_type=>:movie},
-          {:imdb_id=>"0594911", :name=>"Starsky & Hutch", :year=>2004, :video_type=>:tv_show},
-          {:imdb_id=>"0318220", :name=>"HBO First Look", :year=>2004, :video_type=>:tv_show},
-          {:imdb_id=>"0709541", :name=>"Starsky and Hutch Are Guilty", :year=>1977, :video_type=>:tv_show},
-          {:imdb_id=>"0072567", :name=>"Starsky and Hutch", :year=>1977, :video_type=>:tv_show},
-          {:imdb_id=>"0709542", :name=>"Starsky and Hutch on Playboy Island", :year=>1977, :video_type=>:tv_show},
-          {:imdb_id=>"0072567", :name=>"Starsky and Hutch", :year=>1977, :video_type=>:tv_show},
-          {:imdb_id=>"1292747", :name=>"'Starsky & Hutch', 'The Sopranos' and More", :year=>2004, :video_type=>:tv_show},
-          {:imdb_id=>"0405520", :name=>"Best Week Ever", :year=>2004, :video_type=>:tv_show}
+				{:imdb_id=>"0335438", :name=>"Starsky & Hutch", :year=>2004, :video_type=>:movie},
+				{:imdb_id=>"0072567", :name=>"Starsky and Hutch", :year=>1975, :video_type=>:tv_show},
+				{:imdb_id=>"1380813", :name=>"Starsky & Hutch", :year=>2003, :video_type=>:game},
+				{:imdb_id=>"0488639", :name=>"Starsky & Hutch: A Last Look", :year=>2004, :video_type=>:movie},
+				{:imdb_id=>"0594911", :name=>"Starsky & Hutch", :year=>2004, :video_type=>:tv_show},
+				{:imdb_id=>"0318220", :name=>"HBO First Look", :year=>2004, :video_type=>:tv_show},
+				{:imdb_id=>"0709541", :name=>"Starsky and Hutch Are Guilty", :year=>1977, :video_type=>:tv_show},
+				{:imdb_id=>"0072567", :name=>"Starsky and Hutch", :year=>1979, :video_type=>:tv_show},
+				{:imdb_id=>"0072567", :name=>"Starsky and Hutch", :year=>1977, :video_type=>:tv_show},
+				{:imdb_id=>"1979590", :name=>"Starsky & Hutch", :year=> 2004, :video_type=>:tv_show},
+				{:imdb_id=>"0374380", :name=>"DVD on TV", :year=>2004, :video_type=>:tv_show},
+				{:imdb_id=>"4410660", :name=>"Starsky & Hutch", :year=>2002, :video_type=>:tv_show},
+				{:imdb_id=>"0488918", :name=>"Movie House", :year=>2002, :video_type=>:tv_show},
+				{:imdb_id=>"1540121", :name=>"He's Starsky, I'm Hutch", :year=>2004, :video_type=>:movie},
+				{:imdb_id=>"0709543", :name=>"Starsky vs. Hutch", :year=>1979, :video_type=>:tv_show}
       ]
     end
 
