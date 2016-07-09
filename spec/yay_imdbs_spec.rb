@@ -161,6 +161,8 @@ describe YayImdbs do
       show_info = YayImdbs.scrap_movie_info(imdb_id)
 
       show_info[:title].should == 'Lost'
+      show_info[:season].should =~ [6, 5, 4, 3, 2, 1]
+      show_info[:seasons].should =~ [6, 5, 4, 3, 2, 1]
       show_info[:year].should == 2004
       show_info[:video_type].should == :tv_show
       show_info[:plot].should == 'The survivors of a plane crash are forced to live with each other on a remote island, a dangerous new world that poses unique threats of its own.'
