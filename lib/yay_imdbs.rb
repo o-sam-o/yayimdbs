@@ -189,19 +189,14 @@ class YayImdbs
 
     def scrap_images(doc, info_hash)
       #scrap poster image urls
-      thumbnail_url = doc.at_css("td[id=img_primary] a img").try(:[], 'src')
+      thumbnail_url = doc.at_css('.poster img').try(:[], 'src')
       return if thumbnail_url.nil? || thumbnail_url =~ /\/nopicture\//
 
       info_hash['medium_image'] = thumbnail_url
       # Small thumbnail image, gotten by hacking medium url
       info_hash['small_image'] = thumbnail_url.sub(/@@.*$/, '@@._V1._SX120_120,160_.jpg')
 
-      #Try to scrap a larger version of the image url
-      large_img_page_link = doc.at_css("td[id=img_primary] a").try(:[], 'href')
-      return unless large_img_page_link
-      large_img_doc = get_media_page(large_img_page_link)
-      large_img_url = large_img_doc.at_css("img[id=primary-img]").try(:[], 'src')
-      info_hash['large_image'] = large_img_url
+      info_hash['large_image'] = doc.at_css('meta[property="og:image"]').try(:[], 'content')
     end
 
     def scrap_episodes(info_hash)
