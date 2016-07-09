@@ -209,7 +209,7 @@ class YayImdbs
         episode_list.css('.info').each do |ep|
           title = ep.at('a[@title]').text
           episode_number = ep.at("meta[itemprop='episodeNumber']")['content'].to_i
-          episode_plot = ep.at_css('.item_description').text
+          episode_plot = ep.at_css('.item_description').text.strip
           episode_air_date = Date.parse(ep.at_css('.airdate').text) rescue nil
 
           episodes << {:imdb_id=> info_hash[:imdb_id], :series => season_number, :episode => episode_number, :title => title, :plot => episode_plot, :date => episode_air_date}

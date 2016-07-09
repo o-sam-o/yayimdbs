@@ -194,7 +194,7 @@ describe YayImdbs do
       end
 
       series_2_ep_5[:title].should == '...And Found'
-      series_2_ep_5[:plot].strip.should == %q{Michael goes into the jungle to find Walt, but discovers he's not alone. Sawyer and Jin's captors demand to be taken to their camp.}
+      series_2_ep_5[:plot].should == %q{Michael goes into the jungle to find Walt, but discovers he's not alone. Sawyer and Jin's captors demand to be taken to their camp.}
       series_2_ep_5[:date].should == Date.new(y=2005,m=10,d=19)
     end
 
